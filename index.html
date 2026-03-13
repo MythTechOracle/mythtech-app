@@ -3,62 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Signals App · 6h Situational Dashboard</title>
+  <title>Live Signals Dashboard · First Binding Pass</title>
   <style>
-    :root { --bg:#0b1117; --panel:#131e29; --line:#21384a; --text:#dceaf4; --muted:#8da4b6; --accent:#4ad8ff; --ok:#5de39b; --warn:#ffbe5c; --risk:#ff7a7a; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:radial-gradient(circle at top,#122131,#0b1117 48%); color:var(--text); }
-    .wrap { max-width: 1280px; margin: 0 auto; padding: 20px; }
-    .header { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
-    h1 { margin:0; font-size:1.45rem; }
-    .sub { margin-top:6px; color:var(--muted); font-size:.92rem; }
-    .badge { border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--muted); font-size:.82rem; background:rgba(255,255,255,.02); line-height:1.5; }
-    .banner { border-left:4px solid var(--accent); background:rgba(74,216,255,.08); color:#bfe4f3; padding:10px 12px; margin-bottom:12px; font-size:.9rem; }
-    .banner.degraded { border-left-color:var(--warn); background:rgba(255,190,92,.08); color:#ffd9a3; display:none; }
-    .banner.degraded.show { display:block; }
-    .stack { display:grid; gap:12px; }
-    .panel { border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:12px; }
-    .panel h2 { margin:0 0 10px; font-size:1rem; }
-    .layer-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
-    .layer-card { border:1px dashed #2f4f65; border-radius:10px; padding:10px; background:rgba(0,0,0,.12); }
-    .layer-card h3 { margin:0 0 6px; font-size:.86rem; text-transform:uppercase; letter-spacing:.05em; color:#bbd8e8; }
-    .layer-card p { margin:0; color:var(--muted); font-size:.82rem; line-height:1.5; }
-    .metrics-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; }
-    .metric { border:1px solid var(--line); border-radius:10px; padding:10px; background:rgba(0,0,0,.15); cursor:pointer; text-align:left; }
-    .metric:hover { border-color:#3f637d; }
-    .metric .k { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
-    .metric .v { margin-top:4px; font-size:1.15rem; font-weight:700; }
-    .metric .meta { margin-top: 6px; font-size: .76rem; color: var(--muted); }
+    :root{--bg:#0b1117;--panel:#131e29;--line:#21384a;--text:#dceaf4;--muted:#8da4b6;--accent:#4ad8ff;--ok:#5de39b;--warn:#ffbe5c;--risk:#ff7a7a}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at top,#122131,#0b1117 48%);color:var(--text)}
+    .wrap{max-width:1280px;margin:0 auto;padding:20px}.header{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px}h1{margin:0;font-size:1.45rem}.sub{margin-top:6px;color:var(--muted);font-size:.92rem}
+    .badge{border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--muted);font-size:.82rem;background:rgba(255,255,255,.02);line-height:1.5}
+    .banner{border-left:4px solid var(--accent);background:rgba(74,216,255,.08);color:#bfe4f3;padding:10px 12px;margin-bottom:12px;font-size:.9rem}
+    .banner.degraded{border-left-color:var(--warn);background:rgba(255,190,92,.08);color:#ffd9a3;display:none}.banner.degraded.show{display:block}
+    .fixture-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.fixture-btn{border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--muted);padding:6px 10px;border-radius:999px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+    .fixture-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(74,216,255,.08)}
+    .stack{display:grid;gap:12px}.panel{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px}.panel h2{margin:0 0 10px;font-size:1rem}
+    .layer-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.layer-card{border:1px dashed #2f4f65;border-radius:10px;padding:10px;background:rgba(0,0,0,.12)}.layer-card h3{margin:0 0 6px;font-size:.86rem;text-transform:uppercase;letter-spacing:.05em;color:#bbd8e8}.layer-card p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.5}
+    .metrics-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.metric{border:1px solid var(--line);border-radius:10px;padding:10px;background:rgba(0,0,0,.15);cursor:pointer;text-align:left}.metric:disabled{cursor:not-allowed;opacity:.8}
+    .metric .k{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.metric .v{margin-top:4px;font-size:1.15rem;font-weight:700}.metric .meta{margin-top:6px;font-size:.76rem;color:var(--muted)}
     .tone-ok{color:var(--ok)} .tone-warn{color:var(--warn)} .tone-risk{color:var(--risk)}
-    .mid-grid { display:grid; grid-template-columns:1.2fr 1.2fr 1fr; gap:10px; }
-    .bar { margin-bottom:8px; display:block; }
-    .bar-head{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted)}
-    .track{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-top:4px}
-    .fill{height:100%;background:linear-gradient(90deg,#2f95b8,var(--accent));}
-    .spark { display:grid; gap:8px; }
-    .spark-row { display:grid; grid-template-columns:170px 1fr 140px; align-items:center; gap:8px; }
-    .spark-label { color: var(--muted); font-size:.8rem; }
-    .sparkline { height:28px; border:1px solid var(--line); border-radius:6px; background:linear-gradient(180deg,rgba(255,255,255,.03),transparent); overflow:hidden; }
-    .sparkline svg { width:100%; height:100%; display:block; }
-    .delta { font-size:.75rem; text-align:right; }
-    .rank-list { margin:0; padding:0; list-style:none; display:grid; gap:7px; }
-    .rank-list li { display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:7px; color:var(--muted); font-size:.86rem; }
-    table { width:100%; border-collapse:collapse; font-size:.84rem; }
-    th,td { padding:8px 6px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
-    th { color:var(--muted); font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; }
-    .table-empty { color: var(--muted); font-size: .82rem; padding: 8px 0; }
-    .pill { display:inline-block; border:1px solid; border-radius:999px; padding:2px 8px; font-size:.72rem; }
-    .sev-high{color:var(--risk);border-color:rgba(255,122,122,.7)} .sev-medium{color:var(--warn);border-color:rgba(255,190,92,.7)} .sev-low{color:var(--ok);border-color:rgba(93,227,155,.7)}
-    .method-list { margin:0; padding-left:18px; color:var(--muted); font-size:.86rem; line-height:1.65; }
-    .api-list { margin:8px 0 0; padding-left:18px; color:#b7d0df; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.8rem; }
-    .drawer { position:fixed; inset:0; background:rgba(6,10,14,.75); display:none; align-items:flex-end; z-index:20; }
-    .drawer.open { display:flex; }
-    .drawer-card { width:100%; max-height:78vh; overflow:auto; background:#0f1821; border-top:1px solid #2b485f; padding:14px 20px 20px; }
-    .drawer-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-    .close-btn { background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:8px; padding:4px 8px; cursor:pointer; }
-    .drawer-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .block { border:1px solid var(--line); border-radius:10px; padding:10px; }
-    .block h4 { margin:0 0 8px; font-size:.9rem; }
+    .mid-grid{display:grid;grid-template-columns:1.2fr 1.2fr 1fr;gap:10px}.bar{margin-bottom:8px;display:block}.bar-head{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted)}.track{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-top:4px}.fill{height:100%;background:linear-gradient(90deg,#2f95b8,var(--accent))}
+    .spark{display:grid;gap:8px}.spark-row{display:grid;grid-template-columns:170px 1fr 140px;align-items:center;gap:8px}.spark-label{color:var(--muted);font-size:.8rem}.sparkline{height:28px;border:1px solid var(--line);border-radius:6px;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent);overflow:hidden}.sparkline svg{width:100%;height:100%;display:block}.delta{font-size:.75rem;text-align:right}
+    .rank-list{margin:0;padding:0;list-style:none;display:grid;gap:7px}.rank-list li{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:7px;color:var(--muted);font-size:.86rem}
+    table{width:100%;border-collapse:collapse;font-size:.84rem}th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}.table-empty{color:var(--muted);font-size:.82rem;padding:8px 0}
+    .pill{display:inline-block;border:1px solid;border-radius:999px;padding:2px 8px;font-size:.72rem}.sev-high{color:var(--risk);border-color:rgba(255,122,122,.7)}.sev-medium{color:var(--warn);border-color:rgba(255,190,92,.7)}.sev-low{color:var(--ok);border-color:rgba(93,227,155,.7)}
+    .method-list{margin:0;padding-left:18px;color:var(--muted);font-size:.86rem;line-height:1.65}
+    .drawer{position:fixed;inset:0;background:rgba(6,10,14,.75);display:none;align-items:flex-end;z-index:20}.drawer.open{display:flex}.drawer-card{width:100%;max-height:78vh;overflow:auto;background:#0f1821;border-top:1px solid #2b485f;padding:14px 20px 20px}.drawer-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.close-btn{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:4px 8px;cursor:pointer}.drawer-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.block{border:1px solid var(--line);border-radius:10px;padding:10px}.block h4{margin:0 0 8px;font-size:.9rem}
     @media (max-width:1100px){.metrics-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.mid-grid{grid-template-columns:1fr}.layer-grid{grid-template-columns:1fr}.drawer-grid{grid-template-columns:1fr}}
     @media (max-width:760px){.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.spark-row{grid-template-columns:1fr}}
   </style>
@@ -70,226 +36,60 @@
       <div class="badge" id="windowMeta"></div>
     </header>
 
+    <div class="fixture-controls">
+      <button class="fixture-btn active" data-fixture="live">Live/API</button>
+      <button class="fixture-btn" data-fixture="mock">Mock</button>
+      <button class="fixture-btn" data-fixture="degraded">Degraded</button>
+      <button class="fixture-btn" data-fixture="empty">Empty</button>
+    </div>
+
     <section class="banner" id="mainDisclaimer"></section>
     <section class="banner degraded" id="degradedBanner"></section>
 
     <section class="stack">
-      <article class="panel">
-        <h2>Build Law · Three-Layer Separation</h2>
-        <div class="layer-grid">
-          <div class="layer-card"><h3>1) Raw Collection</h3><p>Observed source items are stored unchanged for audit and replay.</p></div>
-          <div class="layer-card"><h3>2) Processed Event Judgments</h3><p>Normalization, clustering, classification, confidence, confirmation, and correction states are computed.</p></div>
-          <div class="layer-card"><h3>3) Display Metrics</h3><p>UI metrics summarize cluster evidence only and remain descriptive/non-predictive.</p></div>
-        </div>
-      </article>
-
+      <article class="panel"><h2>Build Law · Three-Layer Separation</h2><div class="layer-grid"><div class="layer-card"><h3>1) Raw Collection</h3><p>Observed source items preserved for audit.</p></div><div class="layer-card"><h3>2) Processed Judgments</h3><p>Clustering, confidence, confirmation, correction states.</p></div><div class="layer-card"><h3>3) Display Metrics</h3><p>All visible values bind via response → adapter → view model.</p></div></div></article>
       <article class="panel"><h2>Top Metrics · 6h Window</h2><div class="metrics-grid" id="metrics"></div></article>
-      <section class="mid-grid">
-        <article class="panel"><h2 id="compositionTitle">Signal Composition</h2><div id="composition"></div></article>
-        <article class="panel"><h2>Trend vs Baseline (24h/7d)</h2><div class="spark" id="trendSparks"></div></article>
-        <article class="panel"><h2>Regional Concentration</h2><ul class="rank-list" id="regions"></ul></article>
-      </section>
-
-      <article class="panel">
-        <h2 id="eventsTitle">Recent Event Tape</h2>
-        <table>
-          <thead><tr><th>Time (UTC)</th><th>Region</th><th>Category</th><th>Observed Update</th><th>Severity</th><th>Confidence</th><th>Source Count</th><th>Confirmation</th><th>Correction</th></tr></thead>
-          <tbody id="eventTape"></tbody>
-        </table>
-        <div id="eventTapeEmpty" class="table-empty" style="display:none">No events in this window.</div>
-      </article>
-
-      <section class="mid-grid" style="grid-template-columns:1fr 1fr 1fr;">
-        <article class="panel"><h2 id="notesTitle">Volatility Notes</h2><ul class="method-list" id="notes"></ul></article>
-        <article class="panel"><h2 id="methodTitle">Method Snapshot</h2><ul class="method-list" id="method"></ul></article>
-        <article class="panel"><h2>API Surface</h2><ul class="api-list"><li>GET /api/dashboard?window=6h</li><li>GET /api/metrics/history?window=6h&compare=24h,7d</li><li>GET /api/events?window=6h&sort=observed_at:desc&limit=50</li><li>GET /api/composition?window=6h</li><li>GET /api/explain/metric/{metric_key}?window=6h</li></ul></article>
-      </section>
+      <section class="mid-grid"><article class="panel"><h2 id="compositionTitle">Signal Composition</h2><div id="composition"></div></article><article class="panel"><h2>Trend vs Baseline (24h/7d)</h2><div class="spark" id="trendSparks"></div></article><article class="panel"><h2>Regional Concentration</h2><ul class="rank-list" id="regions"></ul></article></section>
+      <article class="panel"><h2 id="eventsTitle">Recent Event Tape</h2><table><thead><tr><th>Time (UTC)</th><th>Region</th><th>Category</th><th>Observed Update</th><th>Severity</th><th>Confidence</th><th>Source Count</th><th>Confirmation</th><th>Correction</th></tr></thead><tbody id="eventTape"></tbody></table><div id="eventTapeEmpty" class="table-empty" style="display:none">No events in this window.</div></article>
+      <section class="mid-grid" style="grid-template-columns:1fr 1fr"><article class="panel"><h2 id="notesTitle">Volatility Notes</h2><ul class="method-list" id="notes"></ul></article><article class="panel"><h2 id="methodTitle">Method Snapshot</h2><ul class="method-list" id="method"></ul></article></section>
     </section>
   </main>
 
-  <div class="drawer" id="drawer">
-    <div class="drawer-card">
-      <div class="drawer-top"><h3 id="drawerTitle" style="margin:0">Metric Explain</h3><button class="close-btn" id="closeDrawer">Close</button></div>
-      <div style="color:var(--muted);font-size:.85rem;margin-bottom:10px" id="drawerSummary"></div>
-      <div class="drawer-grid">
-        <div class="block"><h4>Drivers</h4><table><thead><tr><th>Cluster</th><th>Headline</th><th>Contribution</th></tr></thead><tbody id="clusterRows"></tbody></table></div>
-        <div class="block"><h4>Caveats</h4><ul class="method-list" id="caveats"></ul></div>
-      </div>
-    </div>
-  </div>
+  <div class="drawer" id="drawer"><div class="drawer-card"><div class="drawer-top"><h3 id="drawerTitle" style="margin:0">Metric Explain</h3><button class="close-btn" id="closeDrawer">Close</button></div><div style="color:var(--muted);font-size:.85rem;margin-bottom:10px" id="drawerSummary"></div><div class="drawer-grid"><div class="block"><h4>Drivers</h4><table><thead><tr><th>Cluster</th><th>Headline</th><th>Contribution</th></tr></thead><tbody id="clusterRows"></tbody></table></div><div class="block"><h4>Caveats</h4><ul class="method-list" id="caveats"></ul></div></div></div></div>
 
-  <script>
-    /** @typedef {"low"|"medium"|"high"} Severity */
-    /** @typedef {"up"|"down"|"flat"} DeltaDirection */
-    /** @typedef {"low"|"moderate"|"mixed"|"healthy"|"elevated"|"improving"|"degraded"} MetricStatus */
-    /** @typedef {"emerging"|"single_source"|"confirmed_multi_source"|"corrected"} ConfirmationState */
-    /** @typedef {"none"|"clarified"|"corrected"|"retracted"} CorrectionState */
+<script>
+const metricCardOrder=["signal_velocity","volatility_index","source_diversity","correction_rate","cross_source_coherence","uncertainty_index"];
+const mockDashboardResponse={meta:{api_version:"1.0.0",generated_at:"2026-03-13T06:55:12Z",window:{label:"6h",start:"2026-03-13T00:55:12Z",end:"2026-03-13T06:55:12Z"},refresh_seconds:300,mode:"situational_awareness",predictive:false,timezone:"UTC"},banner:{title:"Six-Hour Geopolitical Signal Dashboard",subtitle:"Rolling monitoring board for event intensity, source mix, and volatility changes.",disclaimer:"Non-predictive use only. This dashboard summarizes observed signals in the last six hours. It does not forecast outcomes, assign probabilities to future conflict, or provide operational advice."},metrics:{cards:[{key:"signal_velocity",label:"Signal Velocity",value:78,display:"78 / 100",unit:"score",delta_vs_prior_window:6,delta_direction:"up",status:"elevated",sparkline:[62,64,67,72,71,78],explain_path:"/api/explain/metric/signal_velocity?window=6h"},{key:"volatility_index",label:"Volatility Index",value:.64,display:"0.64",unit:"ratio",delta_vs_prior_window:.08,delta_direction:"up",status:"elevated",sparkline:[.42,.45,.48,.59,.61,.64],explain_path:"/api/explain/metric/volatility_index?window=6h"},{key:"source_diversity",label:"Source Diversity",value:12,display:"12 feeds",unit:"count",delta_vs_prior_window:2,delta_direction:"up",status:"healthy",sparkline:[9,9,10,11,11,12],explain_path:"/api/explain/metric/source_diversity?window=6h"},{key:"correction_rate",label:"Correction Rate",value:.09,display:"9%",unit:"percent",delta_vs_prior_window:-.03,delta_direction:"down",status:"improving",sparkline:[.16,.15,.13,.12,.11,.09],explain_path:"/api/explain/metric/correction_rate?window=6h"},{key:"cross_source_coherence",label:"Cross-Source Coherence",value:.57,display:"0.57",unit:"ratio",delta_vs_prior_window:.05,delta_direction:"up",status:"mixed",sparkline:[.41,.43,.46,.49,.53,.57],explain_path:"/api/explain/metric/cross_source_coherence?window=6h"},{key:"uncertainty_index",label:"Uncertainty Index",value:.38,display:"0.38",unit:"ratio",delta_vs_prior_window:-.04,delta_direction:"down",status:"moderate",sparkline:[.52,.49,.47,.44,.41,.38],explain_path:"/api/explain/metric/uncertainty_index?window=6h"}]},composition:{title:"Signal Composition",basis:"event_clusters",items:[{key:"diplomacy",label:"Diplomatic updates",count:29,cluster_count:29,share:.29,display:"29%",event_path:"/api/events?window=6h&category=diplomacy"},{key:"security",label:"Security incidents",count:34,cluster_count:34,share:.34,display:"34%",event_path:"/api/events?window=6h&category=security"},{key:"infrastructure",label:"Infrastructure disruptions",count:18,cluster_count:18,share:.18,display:"18%",event_path:"/api/events?window=6h&category=infrastructure"}]},recent_events:{title:"Recent Event Tape (Newest First)",sort:"observed_at_desc",items:[{event_id:"evt_001",cluster_id:"cl_lev_2201",observed_at:"2026-02-24T05:32:00Z",region:"Levant",category:"security",summary:"Multiple outlets report temporary airspace restrictions; status still being clarified.",severity:"high",confidence:.62,source_count:4,confirmation_state:"emerging",correction_state:"none",primary_source_labels:["Wire A"],detail_path:"/api/events/evt_001"},{event_id:"evt_002",cluster_id:"cl_gulf_9911",observed_at:"2026-02-24T05:04:00Z",region:"Gulf",category:"diplomacy",summary:"Foreign ministry statement confirms technical-level talks are scheduled this week.",severity:"medium",confidence:.81,source_count:3,confirmation_state:"confirmed_multi_source",correction_state:"none",primary_source_labels:["Ministry Feed"],detail_path:"/api/events/evt_002"}]},notes:{title:"Volatility Notes",items:["Volatility remains elevated due to dense update clustering.","Coherence improved after corrections reduced divergence.","No directional forecast is provided."]},method_snapshot:{title:"Method Snapshot",items:["Time window: rolling 6 hours.","Count clusters, not headlines.","Confidence is evidence quality, not future certainty."]},system_status:{ingestion:"healthy",notes:[]}};
+const degradedDashboardResponse={...mockDashboardResponse,metrics:{cards:mockDashboardResponse.metrics.cards.map(c=>c.key==="cross_source_coherence"?{...c,value:null,display:"Unavailable",delta_vs_prior_window:null,delta_direction:"flat",status:"degraded",sparkline:[]}:c)},system_status:{ingestion:"degraded",notes:["2 of 12 feeds delayed beyond SLA"]}};
+const emptyDashboardResponse={...mockDashboardResponse,metrics:{cards:[]},composition:{title:"Signal Composition",basis:"event_clusters",items:[]},recent_events:{title:"Recent Event Tape (Newest First)",sort:"observed_at_desc",items:[]},notes:{title:"Volatility Notes",items:["No qualifying signal clusters were observed in the active window."]}};
+const historyFallback={series:{signal_velocity:{baseline_24h_avg:66,baseline_7d_avg:61,points:[62,64,67,72,71,78]},volatility_index:{baseline_24h_avg:.47,baseline_7d_avg:.41,points:[.42,.45,.48,.59,.61,.64]},source_diversity:{baseline_24h_avg:11,baseline_7d_avg:10,points:[9,9,10,11,11,12]},correction_rate:{baseline_24h_avg:.12,baseline_7d_avg:.15,points:[.16,.15,.13,.12,.11,.09]},cross_source_coherence:{baseline_24h_avg:.49,baseline_7d_avg:.45,points:[.41,.43,.46,.49,.53,.57]},uncertainty_index:{baseline_24h_avg:.44,baseline_7d_avg:.49,points:[.52,.49,.47,.44,.41,.38]}}};
+const explainFallback={label:"Metric",definition:"Explanation unavailable.",drivers:[],caveats:["No explain payload in this environment."]};
+const toneMap={low:"tone-ok",moderate:"tone-warn",mixed:"tone-warn",healthy:"tone-ok",elevated:"tone-risk",improving:"tone-ok",degraded:"tone-risk"};
+let fixtureMode="live";let currentVm=null;let currentHistory=historyFallback;
+const els={bannerTitle:document.getElementById("bannerTitle"),bannerSubtitle:document.getElementById("bannerSubtitle"),windowMeta:document.getElementById("windowMeta"),mainDisclaimer:document.getElementById("mainDisclaimer"),degradedBanner:document.getElementById("degradedBanner"),metrics:document.getElementById("metrics"),compositionTitle:document.getElementById("compositionTitle"),composition:document.getElementById("composition"),trendSparks:document.getElementById("trendSparks"),regions:document.getElementById("regions"),eventsTitle:document.getElementById("eventsTitle"),eventTape:document.getElementById("eventTape"),eventTapeEmpty:document.getElementById("eventTapeEmpty"),notesTitle:document.getElementById("notesTitle"),notes:document.getElementById("notes"),methodTitle:document.getElementById("methodTitle"),method:document.getElementById("method"),drawer:document.getElementById("drawer"),drawerTitle:document.getElementById("drawerTitle"),drawerSummary:document.getElementById("drawerSummary"),clusterRows:document.getElementById("clusterRows"),caveats:document.getElementById("caveats")};
+function fallbackMetricLabel(key){return key.split("_").map(p=>p[0].toUpperCase()+p.slice(1)).join(" ")} function getMetricCard(cards,key){const f=cards.find(c=>c.key===key);if(f)return f;return{key,label:fallbackMetricLabel(key),value:null,display:"Unavailable",unit:key==="source_diversity"?"count":"ratio",delta_vs_prior_window:null,delta_direction:"flat",status:"degraded",sparkline:[]}};
+function formatRefreshLabel(seconds){return`Refresh cadence: ${Math.round(seconds/60)} min`} function formatModeLabel(mode){return`Mode: ${mode.replace(/_/g," ")}`} function formatDeltaText(delta,unit){if(delta==null)return"No comparison";const sign=delta>0?"+":delta<0?"":"±";if(unit==="percent")return`${sign}${Math.round(delta*100)}% vs prior window`;if(unit==="ratio")return`${sign}${delta.toFixed(2)} vs prior window`;return`${sign}${delta} vs prior window`}
+function formatUtcStamp(iso){const d=new Date(iso);return`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,"0")}-${String(d.getUTCDate()).padStart(2,"0")} ${String(d.getUTCHours()).padStart(2,"0")}:${String(d.getUTCMinutes()).padStart(2,"0")}`}
+function toTitleCase(v){return v.split(/[_\s-]+/).map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(" ")}
+function mapSystemStatusToBanner(ss){if(!ss||ss.ingestion==="healthy")return{show:false,tone:"healthy",title:"",items:[]};if(ss.ingestion==="degraded")return{show:true,tone:"warning",title:"Feed degradation detected",items:ss.notes};return{show:true,tone:"critical",title:"Feed ingestion unavailable",items:ss.notes}}
+function mapDashboardResponseToViewModel(r){return{header:{title:r.banner.title,subtitle:r.banner.subtitle,disclaimer:r.banner.disclaimer,windowLabel:r.meta.window.label,windowStart:r.meta.window.start,windowEnd:r.meta.window.end,refreshLabel:formatRefreshLabel(r.meta.refresh_seconds),modeLabel:formatModeLabel(r.meta.mode),generatedAt:r.meta.generated_at},metricCards:metricCardOrder.map(key=>{const c=getMetricCard(r.metrics.cards,key);return{key:c.key,title:c.label,valueText:c.display,deltaText:formatDeltaText(c.delta_vs_prior_window,c.unit),deltaDirection:c.delta_direction,status:c.status,sparkline:c.sparkline,disabled:c.value===null,explainPath:c.explain_path}}),composition:{title:r.composition.title,rows:r.composition.items.map(i=>({key:i.key,label:i.label,percent:i.share,percentText:i.display,countText:String(i.cluster_count??i.count??0),href:i.event_path}))},eventTape:{title:r.recent_events.title,rows:r.recent_events.items.map(i=>({key:i.event_id,timeUtc:formatUtcStamp(i.observed_at),region:i.region,category:toTitleCase(i.category),summary:i.summary,severity:i.severity,confidenceText:`${Math.round(i.confidence*100)}%`,sourceCountText:`${i.source_count} sources`,confirmationState:i.confirmation_state,correctionState:i.correction_state,href:i.detail_path})),empty:r.recent_events.items.length===0},notes:r.notes,method:{title:r.method_snapshot.title,items:r.method_snapshot.items},statusBanner:mapSystemStatusToBanner(r.system_status)}}
+function sparkSvg(points,color){if(!points?.length)return'<svg viewBox="0 0 100 100"></svg>';const min=Math.min(...points),max=Math.max(...points);const d=points.map((v,i)=>`${i===0?"M":"L"} ${(i/(points.length-1))*100},${max===min?50:100-((v-min)/(max-min))*100}`).join(" ");return`<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="${color}" stroke-width="4"/></svg>`}
+async function apiFetch(path,fallback){try{const res=await fetch(path,{headers:{Accept:"application/json"}});if(!res.ok)throw new Error();return await res.json()}catch{return fallback}}
+async function openMetricExplain(card){const data=await apiFetch(card.explainPath||"",explainFallback);els.drawerTitle.textContent=`${data.label||card.title} · explain`;els.drawerSummary.textContent=data.definition||"";els.clusterRows.innerHTML="";(data.drivers||[]).forEach(d=>{const tr=document.createElement("tr");tr.innerHTML=`<td>${d.cluster_id||"—"}</td><td>${d.headline||"—"}</td><td>${d.contribution??"—"}</td>`;els.clusterRows.appendChild(tr)});if(!(data.drivers||[]).length)els.clusterRows.innerHTML='<tr><td colspan="3">No metric drivers returned.</td></tr>';els.caveats.innerHTML="";(data.caveats||[]).forEach(c=>{const li=document.createElement("li");li.textContent=c;els.caveats.appendChild(li)});els.drawer.classList.add("open")}
+function render(vm,history){els.bannerTitle.textContent=vm.header.title;els.bannerSubtitle.textContent=vm.header.subtitle;els.mainDisclaimer.innerHTML=`<strong>Non-predictive use only:</strong> ${vm.header.disclaimer}`;els.windowMeta.innerHTML=`<div><strong>Window:</strong> ${vm.header.windowStart} → ${vm.header.windowEnd} (${vm.header.windowLabel})</div><div><strong>Generated:</strong> ${vm.header.generatedAt}</div><div><strong>${vm.header.refreshLabel}</strong></div><div><strong>${vm.header.modeLabel}</strong></div>`;els.degradedBanner.classList.toggle("show",vm.statusBanner.show);if(vm.statusBanner.show)els.degradedBanner.innerHTML=`<strong>${vm.statusBanner.title}</strong> ${vm.statusBanner.items.join(" · ")}`;els.metrics.innerHTML="";vm.metricCards.forEach(card=>{const b=document.createElement("button");b.type="button";b.className="metric";const tone=toneMap[card.status]||"tone-warn";b.innerHTML=`<div class="k">${card.title}</div><div class="v ${tone}">${card.valueText}</div><div class="meta">${card.deltaText} · status: ${card.status}</div>`;b.disabled=card.disabled;b.addEventListener("click",()=>openMetricExplain(card));els.metrics.appendChild(b)});if(!vm.metricCards.length)els.metrics.innerHTML='<div class="table-empty">No metric cards available for this window.</div>';
+els.compositionTitle.textContent=vm.composition.title;els.composition.innerHTML="";vm.composition.rows.forEach(row=>{const el=document.createElement(row.href?"a":"div");el.className="bar";if(row.href){el.href=row.href;el.style.textDecoration="none";el.style.color="inherit"}const pct=Math.max(0,Math.min(100,row.percent*100));el.innerHTML=`<div class="bar-head"><span>${row.label}</span><span>${row.percentText}</span></div><div class="track"><div class="fill" style="width:${pct}%"></div></div>`;els.composition.appendChild(el)});if(!vm.composition.rows.length)els.composition.innerHTML='<div class="table-empty">No composition data.</div>';
+els.trendSparks.innerHTML="";vm.metricCards.forEach(card=>{const s=history.series?.[card.key]||{baseline_24h_avg:"n/a",baseline_7d_avg:"n/a",points:card.sparkline};const color=toneMap[card.status]==="tone-risk"?"#ff7a7a":toneMap[card.status]==="tone-ok"?"#5de39b":"#ffbe5c";const row=document.createElement("div");row.className="spark-row";row.innerHTML=`<div class="spark-label">${card.title}</div><div class="sparkline">${sparkSvg(s.points,color)}</div><div class="delta ${toneMap[card.status]}">24h: ${s.baseline_24h_avg} · 7d: ${s.baseline_7d_avg}</div>`;els.trendSparks.appendChild(row)});
+els.eventsTitle.textContent=vm.eventTape.title;els.eventTape.innerHTML="";vm.eventTape.rows.forEach(r=>{const tr=document.createElement("tr");tr.innerHTML=`<td>${r.timeUtc}</td><td>${r.region}</td><td><span class="pill" style="border-color:var(--line);color:var(--muted)">${r.category}</span></td><td>${r.summary}</td><td><span class="pill sev-${r.severity}">${r.severity.toUpperCase()}</span></td><td>${r.confidenceText}</td><td>${r.sourceCountText}</td><td>${r.confirmationState}</td><td>${r.correctionState}</td>`;tr.style.cursor="pointer";tr.addEventListener("click",()=>window.open(r.href,"_blank"));els.eventTape.appendChild(tr)});els.eventTapeEmpty.style.display=vm.eventTape.empty?"block":"none";
+const rc={};vm.eventTape.rows.forEach(r=>{rc[r.region]=(rc[r.region]||0)+1});els.regions.innerHTML="";const total=vm.eventTape.rows.length||1;Object.entries(rc).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{const li=document.createElement("li");li.innerHTML=`<span>${k}</span><strong>${Math.round((v/total)*100)}%</strong>`;els.regions.appendChild(li)});if(!Object.keys(rc).length)els.regions.innerHTML='<li><span>No events</span><strong>0%</strong></li>';
+els.notesTitle.textContent=vm.notes.title;els.notes.innerHTML="";vm.notes.items.forEach(i=>{const li=document.createElement("li");li.textContent=i;els.notes.appendChild(li)});els.methodTitle.textContent=vm.method.title;els.method.innerHTML="";vm.method.items.forEach(i=>{const li=document.createElement("li");li.textContent=i;els.method.appendChild(li)});}
+async function loadLive(){const dashboard=await apiFetch('/api/dashboard?window=6h',mockDashboardResponse);const history=await apiFetch('/api/metrics/history?window=6h&compare=24h,7d',historyFallback);const events=await apiFetch('/api/events?window=6h&sort=observed_at:desc&limit=50',dashboard.recent_events);const composition=await apiFetch('/api/composition?window=6h',dashboard.composition);const merged={...dashboard,recent_events:{...dashboard.recent_events,items:events.items||dashboard.recent_events.items},composition:{...dashboard.composition,items:composition.items||dashboard.composition.items}};currentVm=mapDashboardResponseToViewModel(merged);currentHistory=history;render(currentVm,currentHistory)}
+function loadFixture(name){const source=name==="degraded"?degradedDashboardResponse:name==="empty"?emptyDashboardResponse:mockDashboardResponse;currentVm=mapDashboardResponseToViewModel(source);render(currentVm,historyFallback)}
+async function refreshByMode(){if(fixtureMode==="live")await loadLive();else loadFixture(fixtureMode)}
 
-    const metricCardOrder = ["signal_velocity","volatility_index","source_diversity","correction_rate","cross_source_coherence","uncertainty_index"];
-
-    const mockDashboardResponse = {
-      meta:{api_version:"1.0.0",generated_at:"2026-03-13T06:55:12Z",window:{label:"6h",start:"2026-03-13T00:55:12Z",end:"2026-03-13T06:55:12Z"},refresh_seconds:300,mode:"situational_awareness",predictive:false,timezone:"UTC"},
-      banner:{title:"Six-Hour Geopolitical Signal Dashboard",subtitle:"Rolling monitoring board for event intensity, source mix, and volatility changes.",disclaimer:"Non-predictive use only. This dashboard summarizes observed signals in the last six hours. It does not forecast outcomes, assign probabilities to future conflict, or provide operational advice."},
-      metrics:{cards:[
-        {key:"signal_velocity",label:"Signal Velocity",value:78,display:"78 / 100",unit:"score",delta_vs_prior_window:6,delta_direction:"up",status:"elevated",sparkline:[62,64,67,72,71,78],explain_path:"/api/explain/metric/signal_velocity?window=6h"},
-        {key:"volatility_index",label:"Volatility Index",value:0.64,display:"0.64",unit:"ratio",delta_vs_prior_window:0.08,delta_direction:"up",status:"elevated",sparkline:[0.42,0.45,0.48,0.59,0.61,0.64],explain_path:"/api/explain/metric/volatility_index?window=6h"},
-        {key:"source_diversity",label:"Source Diversity",value:12,display:"12 feeds",unit:"count",delta_vs_prior_window:2,delta_direction:"up",status:"healthy",sparkline:[9,9,10,11,11,12],explain_path:"/api/explain/metric/source_diversity?window=6h"},
-        {key:"correction_rate",label:"Correction Rate",value:0.09,display:"9%",unit:"percent",delta_vs_prior_window:-0.03,delta_direction:"down",status:"improving",sparkline:[0.16,0.15,0.13,0.12,0.11,0.09],explain_path:"/api/explain/metric/correction_rate?window=6h"},
-        {key:"cross_source_coherence",label:"Cross-Source Coherence",value:0.57,display:"0.57",unit:"ratio",delta_vs_prior_window:0.05,delta_direction:"up",status:"mixed",sparkline:[0.41,0.43,0.46,0.49,0.53,0.57],explain_path:"/api/explain/metric/cross_source_coherence?window=6h"},
-        {key:"uncertainty_index",label:"Uncertainty Index",value:0.38,display:"0.38",unit:"ratio",delta_vs_prior_window:-0.04,delta_direction:"down",status:"moderate",sparkline:[0.52,0.49,0.47,0.44,0.41,0.38],explain_path:"/api/explain/metric/uncertainty_index?window=6h"}
-      ]},
-      composition:{title:"Signal Composition",basis:"event_clusters",items:[
-        {key:"diplomacy",label:"Diplomatic updates",count:29,cluster_count:29,share:0.29,display:"29%",event_path:"/api/events?window=6h&category=diplomacy"},
-        {key:"security",label:"Security incidents",count:34,cluster_count:34,share:0.34,display:"34%",event_path:"/api/events?window=6h&category=security"},
-        {key:"infrastructure",label:"Infrastructure disruptions",count:18,cluster_count:18,share:0.18,display:"18%",event_path:"/api/events?window=6h&category=infrastructure"},
-        {key:"policy",label:"Economic policy signals",count:11,cluster_count:11,share:0.11,display:"11%",event_path:"/api/events?window=6h&category=policy"},
-        {key:"information",label:"Information corrections",count:8,cluster_count:8,share:0.08,display:"8%",event_path:"/api/events?window=6h&category=information"}
-      ]},
-      recent_events:{title:"Recent Event Tape",sort:"observed_at_desc",items:[
-        {event_id:"evt_001",cluster_id:"cl_lev_2201",observed_at:"2026-02-24T05:32:00Z",region:"Levant",category:"security",summary:"Multiple outlets report temporary airspace restrictions; status still being clarified.",severity:"high",confidence:0.62,source_count:4,confirmation_state:"emerging",correction_state:"none",primary_source_labels:["Wire A","Broadcaster B"],detail_path:"/api/events/evt_001"},
-        {event_id:"evt_002",cluster_id:"cl_gulf_9911",observed_at:"2026-02-24T05:04:00Z",region:"Gulf",category:"diplomacy",summary:"Foreign ministry statement confirms technical-level talks are scheduled this week.",severity:"medium",confidence:0.81,source_count:3,confirmation_state:"confirmed_multi_source",correction_state:"none",primary_source_labels:["Ministry Feed","Wire C"],detail_path:"/api/events/evt_002"}
-      ]},
-      notes:{title:"Volatility Notes",items:["Volatility remains elevated due to dense update clustering in the last 90 minutes.","Coherence improved after two high-visibility corrections reduced narrative divergence.","Security-tagged items are the largest share of signal flow in this six-hour window.","No directional forecast is provided; this board is for descriptive monitoring only."]},
-      method_snapshot:{title:"Method Snapshot",items:["Time window: rolling 6 hours, updated at each refresh.","Signal score: weighted count of confirmed updates, corrections, and alert frequency shifts.","Volatility index: normalized measure of hour-to-hour movement in signal score.","Confidence reflects source diversity and cross-source consistency, not future certainty."]},
-      system_status:{ingestion:"healthy",notes:[]}
-    };
-
-    const degradedDashboardResponse = { ...mockDashboardResponse, metrics: { cards: mockDashboardResponse.metrics.cards.map((c) => c.key === "cross_source_coherence" ? {...c,value:null,display:"Unavailable",delta_vs_prior_window:null,delta_direction:"flat",status:"degraded",sparkline:[]} : c ) }, system_status: { ingestion: "degraded", notes: ["2 of 12 feeds delayed beyond SLA"] } };
-    const emptyDashboardResponse = { ...mockDashboardResponse, metrics:{cards:[]}, composition:{title:"Signal Composition",basis:"event_clusters",items:[]}, recent_events:{title:"Recent Event Tape",sort:"observed_at_desc",items:[]}, notes:{title:"Volatility Notes",items:["No qualifying signal clusters were observed in the active window."]}, system_status:{ingestion:"healthy",notes:[]} };
-
-    const historyFallback = { series: { signal_velocity:{baseline_24h_avg:66,baseline_7d_avg:61,points:[62,64,67,72,71,78]}, volatility_index:{baseline_24h_avg:0.47,baseline_7d_avg:0.41,points:[0.42,0.45,0.48,0.59,0.61,0.64]}, source_diversity:{baseline_24h_avg:11,baseline_7d_avg:10,points:[9,9,10,11,11,12]}, correction_rate:{baseline_24h_avg:0.12,baseline_7d_avg:0.15,points:[0.16,0.15,0.13,0.12,0.11,0.09]}, cross_source_coherence:{baseline_24h_avg:0.49,baseline_7d_avg:0.45,points:[0.41,0.43,0.46,0.49,0.53,0.57]}, uncertainty_index:{baseline_24h_avg:0.44,baseline_7d_avg:0.49,points:[0.52,0.49,0.47,0.44,0.41,0.38]} } };
-    const explainFallback = { metric_key: "unknown", label: "Metric", value: null, definition: "No explain payload available.", drivers: [], caveats: ["Explanation unavailable in current environment."] };
-
-    function fallbackMetricLabel(key){ return key.split("_").map((p)=>p[0].toUpperCase()+p.slice(1)).join(" "); }
-    function getMetricCard(cards,key){ const found=cards.find((c)=>c.key===key); if(found) return found; return {key,label:fallbackMetricLabel(key),value:null,display:"Unavailable",unit:key==="source_diversity"?"count":"ratio",delta_vs_prior_window:null,delta_direction:"flat",status:"degraded",sparkline:[]}; }
-    function formatRefreshLabel(seconds){ return `Refresh cadence: ${Math.round(seconds/60)} min`; }
-    function formatModeLabel(mode){ return `Mode: ${mode.replace(/_/g," ")}`; }
-    function formatDeltaText(delta, unit){ if(delta===null||delta===undefined) return "No comparison"; const sign = delta>0?"+":delta<0?"":"±"; if(unit==="percent") return `${sign}${Math.round(delta*100)}% vs prior window`; if(unit==="ratio") return `${sign}${delta.toFixed(2)} vs prior window`; return `${sign}${delta} vs prior window`; }
-    function formatUtcStamp(iso){ const d=new Date(iso); return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,"0")}-${String(d.getUTCDate()).padStart(2,"0")} ${String(d.getUTCHours()).padStart(2,"0")}:${String(d.getUTCMinutes()).padStart(2,"0")}`; }
-    function toTitleCase(v){ return v.split(/[_\s-]+/).map((p)=>p.charAt(0).toUpperCase()+p.slice(1)).join(" "); }
-
-    function mapMetricCardToProps(card){ return { key:card.key,title:card.label,valueText:card.display,deltaText:formatDeltaText(card.delta_vs_prior_window,card.unit),deltaDirection:card.delta_direction,status:card.status,sparkline:card.sparkline,disabled:card.value===null,explainPath:card.explain_path }; }
-    function mapCompositionItemToProps(item){ return { key:item.key,label:item.label,percent:item.share,percentText:item.display,countText:String(item.cluster_count ?? item.count ?? 0),href:item.event_path }; }
-    function mapEventTapeItemToProps(item){ return { key:item.event_id,timeUtc:formatUtcStamp(item.observed_at),region:item.region,category:toTitleCase(item.category),summary:item.summary,severity:item.severity,confidenceText:`${Math.round(item.confidence*100)}%`,sourceCountText:`${item.source_count} sources`,confirmationState:item.confirmation_state,correctionState:item.correction_state,href:item.detail_path }; }
-    function mapSystemStatusToBanner(systemStatus){ if(!systemStatus || systemStatus.ingestion==="healthy") return {show:false,tone:"healthy",title:"",items:[]}; if(systemStatus.ingestion==="degraded") return {show:true,tone:"warning",title:"Feed degradation detected",items:systemStatus.notes}; return {show:true,tone:"critical",title:"Feed ingestion unavailable",items:systemStatus.notes}; }
-
-    function mapDashboardResponseToViewModel(response){
-      return {
-        header:{ title:response.banner.title, subtitle:response.banner.subtitle, disclaimer:response.banner.disclaimer, windowLabel:response.meta.window.label, windowStart:response.meta.window.start, windowEnd:response.meta.window.end, refreshLabel:formatRefreshLabel(response.meta.refresh_seconds), modeLabel:formatModeLabel(response.meta.mode), generatedAt:response.meta.generated_at },
-        metricCards: metricCardOrder.map((key)=> mapMetricCardToProps(getMetricCard(response.metrics.cards,key))),
-        composition:{ title:response.composition.title, rows:response.composition.items.map(mapCompositionItemToProps) },
-        eventTape:{ title:response.recent_events.title, rows:response.recent_events.items.map(mapEventTapeItemToProps), empty:response.recent_events.items.length===0 },
-        notes:{ title:response.notes.title, items:response.notes.items },
-        method:{ title:response.method_snapshot.title, items:response.method_snapshot.items },
-        statusBanner: mapSystemStatusToBanner(response.system_status)
-      };
-    }
-
-    const toneMap = { low:"tone-ok", moderate:"tone-warn", mixed:"tone-warn", healthy:"tone-ok", elevated:"tone-risk", improving:"tone-ok", degraded:"tone-risk" };
-    function sparkSvg(points, color){ if(!points?.length) return '<svg viewBox="0 0 100 100"></svg>'; const min=Math.min(...points), max=Math.max(...points); const d=points.map((v,i)=>`${i===0?"M":"L"} ${(i/(points.length-1))*100},${max===min?50:100-((v-min)/(max-min))*100}`).join(" "); return `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="${color}" stroke-width="4"/></svg>`; }
-
-    const els = {
-      bannerTitle: document.getElementById('bannerTitle'), bannerSubtitle: document.getElementById('bannerSubtitle'), windowMeta: document.getElementById('windowMeta'), mainDisclaimer: document.getElementById('mainDisclaimer'), degradedBanner: document.getElementById('degradedBanner'),
-      metrics: document.getElementById('metrics'), compositionTitle: document.getElementById('compositionTitle'), composition: document.getElementById('composition'), trendSparks: document.getElementById('trendSparks'), regions: document.getElementById('regions'), eventsTitle: document.getElementById('eventsTitle'), eventTape: document.getElementById('eventTape'), eventTapeEmpty: document.getElementById('eventTapeEmpty'),
-      notesTitle: document.getElementById('notesTitle'), notes: document.getElementById('notes'), methodTitle: document.getElementById('methodTitle'), method: document.getElementById('method'),
-      drawer: document.getElementById('drawer'), drawerTitle: document.getElementById('drawerTitle'), drawerSummary: document.getElementById('drawerSummary'), clusterRows: document.getElementById('clusterRows'), caveats: document.getElementById('caveats')
-    };
-
-    let currentVm = mapDashboardResponseToViewModel(mockDashboardResponse);
-    let currentHistory = historyFallback;
-
-    async function apiFetch(path, fallback){ try { const res=await fetch(path,{headers:{Accept:'application/json'}}); if(!res.ok) throw new Error(); return await res.json(); } catch { return fallback; } }
-
-    async function openMetricExplain(metric){
-      const fallback = { ...explainFallback, metric_key: metric.key, label: metric.title, value: metric.valueText };
-      const data = await apiFetch(metric.explainPath || '', fallback);
-      els.drawerTitle.textContent = `${data.label} · explain`;
-      els.drawerSummary.textContent = `${data.definition || ''}`;
-      els.clusterRows.innerHTML = '';
-      (data.drivers || []).forEach((d)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${d.cluster_id||'—'}</td><td>${d.headline||'—'}</td><td>${d.contribution??'—'}</td>`; els.clusterRows.appendChild(tr); });
-      if(!(data.drivers||[]).length) els.clusterRows.innerHTML = '<tr><td colspan="3">No metric drivers returned.</td></tr>';
-      els.caveats.innerHTML=''; (data.caveats||[]).forEach((c)=>{ const li=document.createElement('li'); li.textContent=c; els.caveats.appendChild(li); });
-      els.drawer.classList.add('open');
-    }
-
-    function render(vm, history){
-      els.bannerTitle.textContent = vm.header.title;
-      els.bannerSubtitle.textContent = vm.header.subtitle;
-      els.mainDisclaimer.innerHTML = `<strong>Non-predictive use only:</strong> ${vm.header.disclaimer}`;
-      els.windowMeta.innerHTML = `<div><strong>Window:</strong> ${vm.header.windowStart} → ${vm.header.windowEnd} (${vm.header.windowLabel})</div><div><strong>Generated:</strong> ${vm.header.generatedAt}</div><div><strong>${vm.header.refreshLabel}</strong></div><div><strong>${vm.header.modeLabel}</strong></div>`;
-
-      els.degradedBanner.classList.toggle('show', vm.statusBanner.show);
-      if(vm.statusBanner.show) els.degradedBanner.innerHTML = `<strong>${vm.statusBanner.title}</strong> ${vm.statusBanner.items.join(' · ')}`;
-
-      els.metrics.innerHTML = '';
-      vm.metricCards.forEach((card)=>{
-        const b=document.createElement('button'); b.className='metric'; b.type='button';
-        const tone=toneMap[card.status]||'tone-warn';
-        b.innerHTML = `<div class="k">${card.title}</div><div class="v ${tone}">${card.valueText}</div><div class="meta">${card.deltaText} · status: ${card.status}</div>`;
-        b.disabled = card.disabled;
-        b.addEventListener('click',()=>openMetricExplain(card));
-        els.metrics.appendChild(b);
-      });
-      if(!vm.metricCards.length) els.metrics.innerHTML = '<div class="table-empty">No metric cards available for this window.</div>';
-
-      els.compositionTitle.textContent = vm.composition.title;
-      els.composition.innerHTML = '';
-      vm.composition.rows.forEach((row)=>{
-        const el=document.createElement(row.href?'a':'div');
-        el.className='bar'; if(row.href){el.href=row.href; el.style.textDecoration='none'; el.style.color='inherit';}
-        const pct=Math.max(0,Math.min(100,row.percent*100));
-        el.innerHTML=`<div class="bar-head"><span>${row.label}</span><span>${row.percentText}</span></div><div class="track"><div class="fill" style="width:${pct}%"></div></div>`;
-        els.composition.appendChild(el);
-      });
-      if(!vm.composition.rows.length) els.composition.innerHTML = '<div class="table-empty">No composition data.</div>';
-
-      els.trendSparks.innerHTML = '';
-      vm.metricCards.forEach((card)=>{
-        const series = history.series?.[card.key] || { baseline_24h_avg:'n/a', baseline_7d_avg:'n/a', points: card.sparkline };
-        const color=(toneMap[card.status]==='tone-risk')?'#ff7a7a':(toneMap[card.status]==='tone-ok'?'#5de39b':'#ffbe5c');
-        const row=document.createElement('div'); row.className='spark-row';
-        row.innerHTML=`<div class="spark-label">${card.title}</div><div class="sparkline">${sparkSvg(series.points,color)}</div><div class="delta ${toneMap[card.status]}">24h: ${series.baseline_24h_avg} · 7d: ${series.baseline_7d_avg}</div>`;
-        els.trendSparks.appendChild(row);
-      });
-
-      els.eventsTitle.textContent = vm.eventTape.title;
-      els.eventTape.innerHTML = '';
-      vm.eventTape.rows.forEach((row)=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${row.timeUtc}</td><td>${row.region}</td><td><span class="pill" style="border-color:var(--line);color:var(--muted)">${row.category}</span></td><td>${row.summary}</td><td><span class="pill sev-${row.severity}">${row.severity.toUpperCase()}</span></td><td>${row.confidenceText}</td><td>${row.sourceCountText}</td><td>${row.confirmationState}</td><td>${row.correctionState}</td>`;
-        tr.style.cursor='pointer'; tr.addEventListener('click',()=>window.open(row.href,'_blank'));
-        els.eventTape.appendChild(tr);
-      });
-      els.eventTapeEmpty.style.display = vm.eventTape.empty ? 'block' : 'none';
-
-      const regCounts={}; vm.eventTape.rows.forEach((r)=>{regCounts[r.region]=(regCounts[r.region]||0)+1;});
-      els.regions.innerHTML=''; const total=vm.eventTape.rows.length||1; Object.entries(regCounts).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{ const li=document.createElement('li'); li.innerHTML=`<span>${k}</span><strong>${Math.round((v/total)*100)}%</strong>`; els.regions.appendChild(li); });
-      if(!Object.keys(regCounts).length) els.regions.innerHTML='<li><span>No events</span><strong>0%</strong></li>';
-
-      els.notesTitle.textContent = vm.notes.title; els.notes.innerHTML=''; vm.notes.items.forEach((i)=>{const li=document.createElement('li'); li.textContent=i; els.notes.appendChild(li);});
-      els.methodTitle.textContent = vm.method.title; els.method.innerHTML=''; vm.method.items.forEach((i)=>{const li=document.createElement('li'); li.textContent=i; els.method.appendChild(li);});
-    }
-
-    async function loadAll(){
-      const dashboard = await apiFetch('/api/dashboard?window=6h', mockDashboardResponse);
-      const history = await apiFetch('/api/metrics/history?window=6h&compare=24h,7d', historyFallback);
-      const events = await apiFetch('/api/events?window=6h&sort=observed_at:desc&limit=50', dashboard.recent_events);
-      const composition = await apiFetch('/api/composition?window=6h', dashboard.composition);
-      const merged = { ...dashboard, recent_events: { ...dashboard.recent_events, items: events.items || dashboard.recent_events.items }, composition: { ...dashboard.composition, items: composition.items || dashboard.composition.items } };
-      currentVm = mapDashboardResponseToViewModel(merged);
-      currentHistory = history;
-      render(currentVm, currentHistory);
-    }
-
-    document.getElementById('closeDrawer').addEventListener('click',()=>els.drawer.classList.remove('open'));
-    els.drawer.addEventListener('click',(e)=>{ if(e.target===els.drawer) els.drawer.classList.remove('open'); });
-
-    loadAll();
-    setInterval(loadAll, 300000);
-    setInterval(async()=>{ const events=await apiFetch('/api/events?window=6h&sort=observed_at:desc&limit=50',{items:[]}); const updated={...mockDashboardResponse,recent_events:{...mockDashboardResponse.recent_events,items:events.items||[]}}; currentVm=mapDashboardResponseToViewModel(updated); render(currentVm,currentHistory); },120000);
-    setInterval(async()=>{ currentHistory = await apiFetch('/api/metrics/history?window=6h&compare=24h,7d', currentHistory); render(currentVm,currentHistory); },600000);
-
-    window.__fixtures__ = { mockDashboardResponse, degradedDashboardResponse, emptyDashboardResponse };
-  </script>
+document.querySelectorAll('.fixture-btn').forEach(btn=>btn.addEventListener('click',async()=>{document.querySelectorAll('.fixture-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');fixtureMode=btn.dataset.fixture;await refreshByMode();}));
+document.getElementById('closeDrawer').addEventListener('click',()=>els.drawer.classList.remove('open'));els.drawer.addEventListener('click',e=>{if(e.target===els.drawer)els.drawer.classList.remove('open')});
+refreshByMode();setInterval(()=>{if(fixtureMode==='live')loadLive()},300000);setInterval(()=>{if(fixtureMode==='live')loadLive()},120000);setInterval(()=>{if(fixtureMode==='live')loadLive()},600000);
+window.__fixtures__={mockDashboardResponse,degradedDashboardResponse,emptyDashboardResponse};
+</script>
 </body>
 </html>
