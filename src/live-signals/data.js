@@ -1,4 +1,10 @@
-import { getDashboardFixture, historyFallback } from './fixtures.js';
+import {
+  degradedMetricExplain,
+  emptyMetricExplain,
+  getDashboardFixture,
+  historyFallback,
+  mockMetricExplain,
+} from './fixtures.js';
 
 export async function apiFetch(path, fallback) {
   try {
@@ -10,9 +16,29 @@ export async function apiFetch(path, fallback) {
   }
 }
 
+const modeToFixture = {
+  live_api: 'live_api',
+  live: 'live_api',
+  mock: 'mock',
+  degraded: 'degraded',
+  empty: 'empty',
+};
+
+function getExplainFixture(mode) {
+  if (mode === 'degraded') return degradedMetricExplain;
+  if (mode === 'empty') return emptyMetricExplain;
+  return mockMetricExplain;
+}
+
 export async function loadDashboardResponse({ fixtureMode }) {
-  if (fixtureMode !== 'live') {
-    return { dashboard: getDashboardFixture(fixtureMode), history: historyFallback };
+  const normalizedMode = modeToFixture[fixtureMode] || 'live_api';
+
+  if (normalizedMode !== 'live_api') {
+    return {
+      dashboard: getDashboardFixture(normalizedMode),
+      history: historyFallback,
+      explain: getExplainFixture(normalizedMode),
+    };
   }
 
   const dashboard = await apiFetch('/api/dashboard?window=6h', getDashboardFixture('mock'));
@@ -24,8 +50,9 @@ export async function loadDashboardResponse({ fixtureMode }) {
     dashboard: {
       ...dashboard,
       recent_events: { ...dashboard.recent_events, items: events.items || dashboard.recent_events.items },
-      composition: { ...dashboard.composition, items: composition.items || dashboard.composition.items }
+      composition: { ...dashboard.composition, items: composition.items || dashboard.composition.items },
     },
-    history
+    history,
+    explain: mockMetricExplain,
   };
 }

@@ -30,37 +30,13 @@
 <body>
   <main class="wrap grid">
     <div id="mt07ShellHost"></div>
-
-    <section class="panel grid">
-      <div class="between">
-        <div><h2 id="bannerTitle"></h2><div class="muted small" id="bannerSubtitle"></div></div>
-        <div class="row" id="fixtureControls">
-          <button class="btn active" data-fixture="live">Live/API</button>
-          <button class="btn" data-fixture="mock">Mock</button>
-          <button class="btn" data-fixture="degraded">Degraded</button>
-          <button class="btn" data-fixture="empty">Empty</button>
-        </div>
-      </div>
-      <div class="banner" id="mainDisclaimer"></div>
-      <div class="banner degraded" id="degradedBanner"></div>
-      <div class="panel small muted" id="windowMeta"></div>
-      <div class="metrics" id="metrics"></div>
-      <div class="cols-3">
-        <div class="panel"><h3 id="compositionTitle">Signal Composition</h3><div id="composition"></div></div>
-        <div class="panel"><h3>Trend vs baseline (24h/7d)</h3><div id="trendSparks" class="grid"></div></div>
-        <div class="panel"><h3>Regional Concentration</h3><ul id="regions"></ul></div>
-      </div>
-      <div class="panel"><h3 id="eventsTitle">Recent Event Tape</h3><table><thead><tr><th>Time</th><th>Region</th><th>Category</th><th>Observed update</th><th>Severity</th><th>Conf</th><th>Sources</th><th>Confirm</th><th>Correction</th></tr></thead><tbody id="eventTape"></tbody></table><div id="eventTapeEmpty" class="small muted" style="display:none">No events in this window.</div></div>
-      <div class="cols-2"><div class="panel"><h3 id="notesTitle">Volatility Notes</h3><ul id="notes"></ul></div><div class="panel"><h3 id="methodTitle">Method Snapshot</h3><ul id="method"></ul></div></div>
-    </section>
+    <div id="liveSignalsHost"></div>
   </main>
-
-  <div class="drawer" id="drawer"><div class="drawer-card"><div class="between"><h3 id="drawerTitle">Metric Explain</h3><button class="btn" id="closeDrawer">Close</button></div><p id="drawerSummary" class="muted"></p><table><thead><tr><th>Cluster</th><th>Headline</th><th>Contribution</th></tr></thead><tbody id="clusterRows"></tbody></table><ul id="caveats"></ul></div></div>
 
 <script type="module">
   import { mapDashboardResponseToViewModel } from './src/live-signals/adapter.js';
   import { loadDashboardResponse } from './src/live-signals/data.js';
-  import { getDashboardFixture, historyFallback, mockDashboardResponse, degradedDashboardResponse, emptyDashboardResponse } from './src/live-signals/fixtures.js';
+  import { getDashboardFixture, historyFallback, mockDashboardResponse, degradedDashboardResponse, emptyDashboardResponse, mockMetricExplain } from './src/live-signals/fixtures.js';
   import { renderLiveSignalsBoard } from './src/live-signals/components/LiveSignalsBoard.js';
   import { renderMT07InstrumentShell } from './src_mt07_MT07InstrumentShell.js';
 
@@ -78,7 +54,14 @@
     useSSE: true,
     showSummits: true,
     history: [],
-    fixtureMode: 'live'
+    liveSignals: {
+      mode: 'live_api',
+      loading: false,
+      error: null,
+      response: mockDashboardResponse,
+      history: historyFallback,
+      explain: mockMetricExplain,
+    },
   };
 
   function deriveMt07View() {
@@ -118,6 +101,43 @@
     });
   }
 
+  function renderLiveSignals() {
+    const liveSignalsRoot = document.getElementById('liveSignalsHost');
+    const response = state.liveSignals.response ?? mockDashboardResponse;
+    const vm = mapDashboardResponseToViewModel(response);
+
+    console.log('[host->board]', {
+      mode: state.liveSignals.mode,
+      loading: state.liveSignals.loading,
+      error: state.liveSignals.error,
+      hasVm: !!vm,
+      metricCount: vm?.metricCards?.length ?? 0,
+      compositionCount: vm?.composition?.rows?.length ?? 0,
+      eventCount: vm?.eventTape?.rows?.length ?? 0,
+      noteCount: vm?.notes?.items?.length ?? 0,
+      methodCount: vm?.method?.items?.length ?? 0,
+      historySeries: Object.keys(state.liveSignals.history?.series ?? {}),
+    });
+
+    renderLiveSignalsBoard(liveSignalsRoot, {
+      title: 'Live Signals Overlay',
+      subtitle: 'Descriptive monitoring layer for event intensity, source mix, and correction-aware signal flow.',
+      vm,
+      history: state.liveSignals.history,
+      explain: state.liveSignals.explain,
+      mode: state.liveSignals.mode,
+      loading: state.liveSignals.loading,
+      error: state.liveSignals.error,
+      onModeChange(nextMode) {
+        state.liveSignals.mode = nextMode;
+        refreshSignals();
+      },
+      onRefresh() {
+        refreshSignals();
+      },
+    });
+  }
+
   function pushMt7Sample() {
     const axis = randomAxis();
     const summit = Math.random() < 0.35;
@@ -134,25 +154,27 @@
   }
 
   async function refreshSignals() {
-    const { dashboard, history } = await loadDashboardResponse({ fixtureMode: state.fixtureMode });
-    renderLiveSignalsBoard(mapDashboardResponseToViewModel(dashboard), history);
+    state.liveSignals.loading = true;
+    renderLiveSignals();
+
+    try {
+      const { dashboard, history, explain } = await loadDashboardResponse({ fixtureMode: state.liveSignals.mode });
+      state.liveSignals.response = dashboard;
+      state.liveSignals.history = history;
+      state.liveSignals.explain = explain;
+      state.liveSignals.error = null;
+    } catch (err) {
+      state.liveSignals.error = String(err);
+    } finally {
+      state.liveSignals.loading = false;
+      renderLiveSignals();
+    }
   }
 
-  document.querySelectorAll('[data-fixture]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      document.querySelectorAll('[data-fixture]').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.fixtureMode = btn.dataset.fixture;
-      await refreshSignals();
-    });
-  });
-
-  document.getElementById('closeDrawer').addEventListener('click', () => document.getElementById('drawer').classList.remove('open'));
-  document.getElementById('drawer').addEventListener('click', (e) => { if (e.target.id === 'drawer') e.target.classList.remove('open'); });
-
   pushMt7Sample();
+  renderLiveSignals();
   refreshSignals();
-  setInterval(() => { if (state.fixtureMode === 'live') refreshSignals(); }, 300000);
+  setInterval(() => { if (state.liveSignals.mode === 'live_api') refreshSignals(); }, 300000);
 
   window.__fixtures__ = { mockDashboardResponse, degradedDashboardResponse, emptyDashboardResponse, getDashboardFixture, historyFallback };
 </script>
