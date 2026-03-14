@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Weaver's Loom MT-07 + Live Signals Merge</title>
   <style>
-    :root{--bg:#0b1117;--panel:#131e29;--line:#21384a;--text:#dceaf4;--muted:#8da4b6;--accent:#4ad8ff;--ok:#5de39b;--warn:#ffbe5c;--risk:#ff7a7a;--violet:#a78bfa}
+    :root{--bg:#0b1117;--panel:#131e29;--line:#21384a;--text:#dceaf4;--muted:#8da4b6;--accent:#4ad8ff;--ok:#5de39b;--warn:#ffbe5c;--risk:#ff7a7a}
     *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at top,#122131,#0b1117 48%);color:var(--text)}
     .wrap{max-width:1280px;margin:0 auto;padding:20px}.panel{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px}.grid{display:grid;gap:12px}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.between{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -15,17 +15,15 @@
     .badge{border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:.72rem}.ok{color:var(--ok)}.warn{color:var(--warn)}.risk{color:var(--risk)}
     input{background:#0c141d;border:1px solid var(--line);color:var(--text);padding:8px;border-radius:8px;width:100%}
     .cols-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.cols-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .chart{height:280px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.15);padding:8px}
-    .trace-item{border:1px solid var(--line);border-radius:10px;padding:8px;background:rgba(0,0,0,.15)}
-    .banner{border-left:4px solid var(--accent);background:rgba(74,216,255,.08);padding:10px;color:#bfe4f3}
-    .banner.degraded{border-left-color:var(--warn);background:rgba(255,190,92,.08);color:#ffd9a3;display:none}.banner.degraded.show{display:block}
-    .metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.metric{border:1px solid var(--line);border-radius:10px;padding:10px;background:rgba(0,0,0,.15)}
-    .metric .k{font-size:.72rem;color:var(--muted);text-transform:uppercase}.metric .v{font-size:1.2rem;font-weight:700}.bar{margin:8px 0}.track{height:8px;background:#1b2a37;border-radius:999px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#2f95b8,var(--accent))}
+    .chart{height:280px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.15);padding:8px}.trace-item{border:1px solid var(--line);border-radius:10px;padding:8px;background:rgba(0,0,0,.15)}
+    .banner{border-left:4px solid var(--accent);background:rgba(74,216,255,.08);padding:10px;color:#bfe4f3}.banner.degraded{display:none;border-left-color:var(--warn);background:rgba(255,190,92,.08);color:#ffd9a3}.banner.degraded.show{display:block}
+    .metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.metric{border:1px solid var(--line);border-radius:10px;padding:10px;background:rgba(0,0,0,.15);text-align:left}.metric .k{font-size:.72rem;color:var(--muted);text-transform:uppercase}.metric .v{font-size:1.2rem;font-weight:700}.bar{margin:8px 0}.track{height:8px;background:#1b2a37;border-radius:999px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#2f95b8,var(--accent))}
+    .tone-ok{color:var(--ok)} .tone-warn{color:var(--warn)} .tone-risk{color:var(--risk)}
     table{width:100%;border-collapse:collapse;font-size:.84rem}th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);font-size:.75rem;text-transform:uppercase}
-    .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:.72rem}
+    .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:.72rem}.sev-high{color:var(--risk)}.sev-medium{color:var(--warn)}.sev-low{color:var(--ok)}
+    .spark-row{display:grid;grid-template-columns:170px 1fr 140px;gap:8px;align-items:center}.sparkline{height:24px;border:1px solid var(--line);border-radius:6px}
     .drawer{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-end}.drawer.open{display:flex}.drawer-card{background:#0f1821;border-top:1px solid var(--line);padding:14px;width:100%;max-height:70vh;overflow:auto}
-    .spark{height:24px;border:1px solid var(--line);border-radius:6px}
-    @media (max-width:1100px){.cols-3,.cols-2{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media (max-width:1100px){.cols-3,.cols-2{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.spark-row{grid-template-columns:1fr}}
     @media (max-width:760px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
@@ -33,56 +31,26 @@
   <main class="wrap grid">
     <section class="panel grid">
       <div class="between">
-        <div>
-          <h1>Weaver's Loom — MT-07 v0.3.3-TPF</h1>
-          <div class="muted small">Primary MT-07 radar/timeline instrument with a secondary VM-bound Live Signals board.</div>
-        </div>
+        <div><h1>Weaver's Loom — MT-07 v0.3.3-TPF</h1><div class="muted small">Primary MT-07 shell + extracted Live Signals module stack.</div></div>
         <div class="row">
-          <button class="btn" id="spinBtn">Pause Spin</button>
-          <button class="btn" id="modeBtn">Live</button>
-          <button class="btn" id="streamBtn">SSE</button>
-          <button class="btn" id="summitBtn">Hide Summits</button>
+          <button class="btn" id="spinBtn">Pause Spin</button><button class="btn" id="modeBtn">Live</button><button class="btn" id="streamBtn">SSE</button><button class="btn" id="summitBtn">Hide Summits</button>
         </div>
       </div>
-
       <div class="cols-3">
-        <div class="panel">
-          <div class="small muted">Base URL</div>
-          <input id="baseUrl" value="http://localhost:8787" />
-        </div>
-        <div class="panel">
-          <div class="small muted">Sampling Interval (demo ms)</div>
-          <input id="intervalMs" type="number" min="400" step="100" value="1200" />
-        </div>
-        <div class="panel">
-          <div class="small muted">MT-07 Status</div>
-          <div class="row" id="mt7Status"></div>
-        </div>
+        <div class="panel"><div class="small muted">Base URL</div><input id="baseUrl" value="http://localhost:8787" /></div>
+        <div class="panel"><div class="small muted">Sampling Interval (demo ms)</div><input id="intervalMs" type="number" min="400" step="100" value="1200" /></div>
+        <div class="panel"><div class="small muted">MT-07 Status</div><div class="row" id="mt7Status"></div></div>
       </div>
-
       <div class="cols-2">
-        <div class="panel">
-          <div class="between"><h3>Axis Radar</h3><span class="small muted">clamped ±3</span></div>
-          <svg id="radar" class="chart" viewBox="0 0 320 280"></svg>
-        </div>
-        <div class="panel">
-          <div class="between"><h3>Tension Timeline</h3><span class="small muted">max |axis| + summit bands</span></div>
-          <svg id="timeline" class="chart" viewBox="0 0 560 280"></svg>
-        </div>
+        <div class="panel"><div class="between"><h3>Axis Radar</h3><span class="small muted">clamped ±3</span></div><svg id="radar" class="chart" viewBox="0 0 320 280"></svg></div>
+        <div class="panel"><div class="between"><h3>Tension Timeline</h3><span class="small muted">max |axis| + summit bands</span></div><svg id="timeline" class="chart" viewBox="0 0 560 280"></svg></div>
       </div>
-
-      <div class="panel">
-        <div class="between"><h3>Mirror Trace (last cycle)</h3><span class="small muted">flip → drift → clamp</span></div>
-        <div id="traceList" class="grid"></div>
-      </div>
+      <div class="panel"><div class="between"><h3>Mirror Trace (last cycle)</h3><span class="small muted">flip → drift → clamp</span></div><div id="traceList" class="grid"></div></div>
     </section>
 
     <section class="panel grid">
       <div class="between">
-        <div>
-          <h2 id="bannerTitle"></h2>
-          <div class="muted small" id="bannerSubtitle"></div>
-        </div>
+        <div><h2 id="bannerTitle"></h2><div class="muted small" id="bannerSubtitle"></div></div>
         <div class="row" id="fixtureControls">
           <button class="btn active" data-fixture="live">Live/API</button>
           <button class="btn" data-fixture="mock">Mock</button>
@@ -90,167 +58,123 @@
           <button class="btn" data-fixture="empty">Empty</button>
         </div>
       </div>
-
       <div class="banner" id="mainDisclaimer"></div>
       <div class="banner degraded" id="degradedBanner"></div>
       <div class="panel small muted" id="windowMeta"></div>
-
       <div class="metrics" id="metrics"></div>
-
       <div class="cols-3">
         <div class="panel"><h3 id="compositionTitle">Signal Composition</h3><div id="composition"></div></div>
         <div class="panel"><h3>Trend vs baseline (24h/7d)</h3><div id="trendSparks" class="grid"></div></div>
         <div class="panel"><h3>Regional Concentration</h3><ul id="regions"></ul></div>
       </div>
-
-      <div class="panel">
-        <h3 id="eventsTitle">Recent Event Tape</h3>
-        <table><thead><tr><th>Time</th><th>Region</th><th>Category</th><th>Observed update</th><th>Severity</th><th>Conf</th><th>Sources</th><th>Confirm</th><th>Correction</th></tr></thead><tbody id="eventTape"></tbody></table>
-        <div id="eventTapeEmpty" class="small muted" style="display:none">No events in this window.</div>
-      </div>
-
-      <div class="cols-2">
-        <div class="panel"><h3 id="notesTitle">Volatility Notes</h3><ul id="notes"></ul></div>
-        <div class="panel"><h3 id="methodTitle">Method Snapshot</h3><ul id="method"></ul></div>
-      </div>
+      <div class="panel"><h3 id="eventsTitle">Recent Event Tape</h3><table><thead><tr><th>Time</th><th>Region</th><th>Category</th><th>Observed update</th><th>Severity</th><th>Conf</th><th>Sources</th><th>Confirm</th><th>Correction</th></tr></thead><tbody id="eventTape"></tbody></table><div id="eventTapeEmpty" class="small muted" style="display:none">No events in this window.</div></div>
+      <div class="cols-2"><div class="panel"><h3 id="notesTitle">Volatility Notes</h3><ul id="notes"></ul></div><div class="panel"><h3 id="methodTitle">Method Snapshot</h3><ul id="method"></ul></div></div>
     </section>
   </main>
 
   <div class="drawer" id="drawer"><div class="drawer-card"><div class="between"><h3 id="drawerTitle">Metric Explain</h3><button class="btn" id="closeDrawer">Close</button></div><p id="drawerSummary" class="muted"></p><table><thead><tr><th>Cluster</th><th>Headline</th><th>Contribution</th></tr></thead><tbody id="clusterRows"></tbody></table><ul id="caveats"></ul></div></div>
 
-<script>
-  const clamp=(v,min=-3,max=3)=>Math.max(min,Math.min(max,v));
-  const canonical=(a)=>({chaos:clamp(a.chaos),order:clamp(a.order),narrative:clamp(a.narrative),time:clamp(a.time)});
-  const randomAxis=()=>canonical({chaos:Math.random()*6-3,order:Math.random()*6-3,narrative:Math.random()*6-3,time:Math.random()*6-3});
-  const maxMag=(a)=>Math.max(Math.abs(a.chaos),Math.abs(a.order),Math.abs(a.narrative),Math.abs(a.time));
-  const checksumAxis=(ax)=>Math.abs(Math.floor((ax.chaos+3)*1000+(ax.order+3)*100+(ax.narrative+3)*10+(ax.time+3))).toString(36);
+<script type="module">
+  import { mapDashboardResponseToViewModel } from './src/live-signals/adapter.js';
+  import { loadDashboardResponse } from './src/live-signals/data.js';
+  import { getDashboardFixture, historyFallback, mockDashboardResponse, degradedDashboardResponse, emptyDashboardResponse } from './src/live-signals/fixtures.js';
+  import { renderLiveSignalsBoard } from './src/live-signals/components/LiveSignalsBoard.js';
 
-  let demoMode=true, rotating=true, useSSE=true, showSummits=true, intervalMs=1200, history=[];
-  const baseUrlEl=document.getElementById('baseUrl'); const intervalEl=document.getElementById('intervalMs');
+  // MT-07 host shell state & helpers (kept local by design).
+  const clamp = (v, min = -3, max = 3) => Math.max(min, Math.min(max, v));
+  const canonical = (a) => ({ chaos: clamp(a.chaos), order: clamp(a.order), narrative: clamp(a.narrative), time: clamp(a.time) });
+  const randomAxis = () => canonical({ chaos: Math.random() * 6 - 3, order: Math.random() * 6 - 3, narrative: Math.random() * 6 - 3, time: Math.random() * 6 - 3 });
+  const maxMag = (a) => Math.max(Math.abs(a.chaos), Math.abs(a.order), Math.abs(a.narrative), Math.abs(a.time));
+  const checksumAxis = (ax) => Math.abs(Math.floor((ax.chaos + 3) * 1000 + (ax.order + 3) * 100 + (ax.narrative + 3) * 10 + (ax.time + 3))).toString(36);
+  const badge = (label, cls = '') => `<span class="badge ${cls}">${label}</span>`;
 
-  function badge(label, cls=''){ return `<span class="badge ${cls}">${label}</span>`; }
+  let demoMode = true;
+  let rotating = true;
+  let useSSE = true;
+  let showSummits = true;
+  let intervalMs = 1200;
+  let history = [];
+  let fixtureMode = 'live';
 
-  function drawRadar(axis){
-    const svg=document.getElementById('radar');
-    const c={x:160,y:140},R=95;
-    const pts=[['chaos',0],['order',Math.PI/2],['narrative',Math.PI],['time',-Math.PI/2]];
-    let poly='';
-    pts.forEach(([k,a])=>{ const v=(axis[k]+3)/6; const x=c.x+Math.cos(a)*R*v; const y=c.y+Math.sin(a)*R*v; poly += `${x},${y} `; });
-    svg.innerHTML=`<circle cx="${c.x}" cy="${c.y}" r="${R}" fill="none" stroke="#334155"/>
-      <circle cx="${c.x}" cy="${c.y}" r="${R*2/3}" fill="none" stroke="#243442"/>
-      <circle cx="${c.x}" cy="${c.y}" r="${R/3}" fill="none" stroke="#243442"/>
-      ${pts.map(([k,a])=>`<line x1="${c.x}" y1="${c.y}" x2="${c.x+Math.cos(a)*R}" y2="${c.y+Math.sin(a)*R}" stroke="#243442"/><text x="${c.x+Math.cos(a)*(R+16)}" y="${c.y+Math.sin(a)*(R+16)}" fill="#8da4b6" font-size="10" text-anchor="middle">${k}</text>`).join('')}
-      <polygon points="${poly}" fill="rgba(167,139,250,.3)" stroke="#a78bfa" stroke-width="2"/>`;
-    svg.style.transform = rotating ? `rotate(${Date.now()/120}deg)` : 'none';
+  const intervalEl = document.getElementById('intervalMs');
+
+  function drawRadar(axis) {
+    const svg = document.getElementById('radar');
+    const c = { x: 160, y: 140 }; const R = 95;
+    const pts = [['chaos', 0], ['order', Math.PI / 2], ['narrative', Math.PI], ['time', -Math.PI / 2]];
+    let poly = '';
+    pts.forEach(([k, a]) => { const v = (axis[k] + 3) / 6; poly += `${c.x + Math.cos(a) * R * v},${c.y + Math.sin(a) * R * v} `; });
+    svg.innerHTML = `<circle cx="${c.x}" cy="${c.y}" r="${R}" fill="none" stroke="#334155"/>${pts.map(([k, a]) => `<line x1="${c.x}" y1="${c.y}" x2="${c.x + Math.cos(a) * R}" y2="${c.y + Math.sin(a) * R}" stroke="#243442"/><text x="${c.x + Math.cos(a) * (R + 16)}" y="${c.y + Math.sin(a) * (R + 16)}" fill="#8da4b6" font-size="10" text-anchor="middle">${k}</text>`).join('')}<polygon points="${poly}" fill="rgba(167,139,250,.3)" stroke="#a78bfa" stroke-width="2"/>`;
+    svg.style.transform = rotating ? `rotate(${Date.now() / 120}deg)` : 'none';
   }
 
-  function drawTimeline(items){
-    const svg=document.getElementById('timeline');
-    const W=560,H=280,p=20;
-    if(!items.length){ svg.innerHTML=''; return; }
-    const n=items.length-1||1;
-    const toX=i=>p+(i/n)*(W-p*2); const toY=v=>H-p-(v/3)*(H-p*2);
-    const line=items.map((d,i)=>`${i?'L':'M'} ${toX(i)} ${toY(d.max)}`).join(' ');
-    const bands=showSummits?items.map((d,i)=>d.summit?`<rect x="${toX(i)-2}" y="${p}" width="4" height="${H-p*2}" fill="rgba(99,102,241,.2)"/>`:'' ).join(''):'';
-    svg.innerHTML=`${bands}<path d="${line}" fill="none" stroke="#34d399" stroke-width="2"/>`;
+  function drawTimeline(items) {
+    const svg = document.getElementById('timeline');
+    const W = 560, H = 280, p = 20;
+    if (!items.length) { svg.innerHTML = ''; return; }
+    const n = items.length - 1 || 1;
+    const toX = (i) => p + (i / n) * (W - p * 2);
+    const toY = (v) => H - p - (v / 3) * (H - p * 2);
+    const line = items.map((d, i) => `${i ? 'L' : 'M'} ${toX(i)} ${toY(d.max)}`).join(' ');
+    const bands = showSummits ? items.map((d, i) => d.summit ? `<rect x="${toX(i) - 2}" y="${p}" width="4" height="${H - p * 2}" fill="rgba(99,102,241,.2)"/>` : '').join('') : '';
+    svg.innerHTML = `${bands}<path d="${line}" fill="none" stroke="#34d399" stroke-width="2"/>`;
   }
 
-  function pushMt7Sample(){
-    const axis=randomAxis();
-    const summit=Math.random()<0.35;
-    const item={ts:new Date().toISOString(),axis,summit,brittleness:maxMag(axis)>=2.5,statement:summit?'Summit reached — structural equilibrium.':'',checksum:checksumAxis(axis),trace:[{hub:'X',flipped_axis:'order',class_shift:summit?'changed':'unchanged',interpretive_note:'Synthetic mirror pass trace'}]};
-    history=(history.length>240?history.slice(-240):history).concat(item);
-    renderMt7();
-    if(demoMode) setTimeout(pushMt7Sample, intervalMs);
-  }
-
-  function renderMt7(){
-    const last=history[history.length-1]||{axis:{chaos:0,order:0,narrative:0,time:0},summit:false,brittleness:false,checksum:'n/a',trace:[]};
+  function renderMt7() {
+    const last = history[history.length - 1] || { axis: { chaos: 0, order: 0, narrative: 0, time: 0 }, summit: false, brittleness: false, checksum: 'n/a', trace: [] };
     document.getElementById('mt7Status').innerHTML = [
-      badge(demoMode?'Demo':(useSSE?'Live • SSE':'Live • WS'),demoMode?'warn':'ok'),
-      badge(last.summit?'Summit':'Scanning',last.summit?'warn':'ok'),
-      badge(last.brittleness?'Brittle':'Elastic',last.brittleness?'risk':'ok'),
+      badge(demoMode ? 'Demo' : (useSSE ? 'Live • SSE' : 'Live • WS'), demoMode ? 'warn' : 'ok'),
+      badge(last.summit ? 'Summit' : 'Scanning', last.summit ? 'warn' : 'ok'),
+      badge(last.brittleness ? 'Brittle' : 'Elastic', last.brittleness ? 'risk' : 'ok'),
       badge(`Relief • ${last.checksum}`)
     ].join(' ');
     drawRadar(last.axis);
-    drawTimeline(history.map((h,i)=>({i,max:maxMag(h.axis),summit:h.summit})));
-    document.getElementById('traceList').innerHTML=(last.trace||[]).map(t=>`<div class="trace-item"><div class="row">${badge('Hub '+t.hub)} ${badge('flip: '+t.flipped_axis)} ${badge('class: '+t.class_shift,t.class_shift==='changed'?'ok':'')}</div><div class="small muted">${t.interpretive_note}</div></div>`).join('') || '<div class="small muted">No mirror trace yet.</div>';
+    drawTimeline(history.map((h) => ({ max: maxMag(h.axis), summit: h.summit })));
+    document.getElementById('traceList').innerHTML = (last.trace || []).map((t) => `<div class="trace-item"><div class="row">${badge('Hub ' + t.hub)} ${badge('flip: ' + t.flipped_axis)} ${badge('class: ' + t.class_shift, t.class_shift === 'changed' ? 'ok' : '')}</div><div class="small muted">${t.interpretive_note}</div></div>`).join('') || '<div class="small muted">No mirror trace yet.</div>';
   }
 
-  // Live Signals seam
-  const metricCardOrder=["signal_velocity","volatility_index","source_diversity","correction_rate","cross_source_coherence","uncertainty_index"];
-  const mockDashboardResponse={meta:{api_version:'1.0.0',generated_at:'2026-03-13T06:55:12Z',window:{label:'6h',start:'2026-03-13T00:55:12Z',end:'2026-03-13T06:55:12Z'},refresh_seconds:300,mode:'situational_awareness',predictive:false,timezone:'UTC'},banner:{title:'Live Signals Overlay',subtitle:'Descriptive monitoring layer for event intensity, source mix, and correction-aware signal flow.',disclaimer:'Non-predictive use only. This dashboard summarizes observed signals in the active window. It does not forecast outcomes or assign future probabilities.'},metrics:{cards:[{key:'signal_velocity',label:'Signal Velocity',value:78,display:'78 / 100',unit:'score',delta_vs_prior_window:6,delta_direction:'up',status:'elevated',sparkline:[62,64,67,72,71,78],explain_path:'/api/explain/metric/signal_velocity?window=6h'},{key:'volatility_index',label:'Volatility Index',value:.64,display:'0.64',unit:'ratio',delta_vs_prior_window:.08,delta_direction:'up',status:'elevated',sparkline:[.42,.45,.48,.59,.61,.64],explain_path:'/api/explain/metric/volatility_index?window=6h'},{key:'source_diversity',label:'Source Diversity',value:12,display:'12 feeds',unit:'count',delta_vs_prior_window:2,delta_direction:'up',status:'healthy',sparkline:[9,9,10,11,11,12],explain_path:'/api/explain/metric/source_diversity?window=6h'},{key:'correction_rate',label:'Correction Rate',value:.09,display:'9%',unit:'percent',delta_vs_prior_window:-.03,delta_direction:'down',status:'improving',sparkline:[.16,.15,.13,.12,.11,.09],explain_path:'/api/explain/metric/correction_rate?window=6h'},{key:'cross_source_coherence',label:'Cross-Source Coherence',value:.57,display:'0.57',unit:'ratio',delta_vs_prior_window:.05,delta_direction:'up',status:'mixed',sparkline:[.41,.43,.46,.49,.53,.57],explain_path:'/api/explain/metric/cross_source_coherence?window=6h'},{key:'uncertainty_index',label:'Uncertainty Index',value:.38,display:'0.38',unit:'ratio',delta_vs_prior_window:-.04,delta_direction:'down',status:'moderate',sparkline:[.52,.49,.47,.44,.41,.38],explain_path:'/api/explain/metric/uncertainty_index?window=6h'}]},composition:{title:'Signal Composition',basis:'event_clusters',items:[{key:'security',label:'Security incidents',count:34,cluster_count:34,share:.34,display:'34%',event_path:'/api/events?window=6h&category=security'},{key:'diplomacy',label:'Diplomatic updates',count:29,cluster_count:29,share:.29,display:'29%',event_path:'/api/events?window=6h&category=diplomacy'}]},recent_events:{title:'Recent Event Tape (Newest First)',sort:'observed_at_desc',items:[{event_id:'evt_001',cluster_id:'cl_lev_2201',observed_at:'2026-02-24T05:32:00Z',region:'Levant',category:'security',summary:'Multiple outlets report temporary airspace restrictions; status still being clarified.',severity:'high',confidence:.62,source_count:4,confirmation_state:'emerging',correction_state:'none',primary_source_labels:['Wire A'],detail_path:'/api/events/evt_001'},{event_id:'evt_002',cluster_id:'cl_gulf_9911',observed_at:'2026-02-24T05:04:00Z',region:'Gulf',category:'diplomacy',summary:'Foreign ministry statement confirms technical-level talks are scheduled this week.',severity:'medium',confidence:.81,source_count:3,confirmation_state:'confirmed_multi_source',correction_state:'none',primary_source_labels:['Ministry Feed'],detail_path:'/api/events/evt_002'}]},notes:{title:'Volatility Notes',items:['Volatility remains elevated due to dense update clustering.','Coherence improved after corrections reduced divergence.','No directional forecast is provided.']},method_snapshot:{title:'Method Snapshot',items:['Time window: rolling 6 hours.','Count clusters, not headlines.','Confidence is evidence quality, not future certainty.']},system_status:{ingestion:'healthy',notes:[]}};
-  const degradedDashboardResponse={...mockDashboardResponse,metrics:{cards:mockDashboardResponse.metrics.cards.map(c=>c.key==='cross_source_coherence'?{...c,value:null,display:'Unavailable',delta_vs_prior_window:null,delta_direction:'flat',status:'degraded',sparkline:[]}:c)},system_status:{ingestion:'degraded',notes:['2 of 12 feeds delayed beyond SLA']}};
-  const emptyDashboardResponse={...mockDashboardResponse,metrics:{cards:[]},composition:{title:'Signal Composition',basis:'event_clusters',items:[]},recent_events:{title:'Recent Event Tape (Newest First)',sort:'observed_at_desc',items:[]},notes:{title:'Volatility Notes',items:['No qualifying signal clusters were observed in the active window.']}};
-  const historyFallback={series:{signal_velocity:{baseline_24h_avg:66,baseline_7d_avg:61,points:[62,64,67,72,71,78]},volatility_index:{baseline_24h_avg:.47,baseline_7d_avg:.41,points:[.42,.45,.48,.59,.61,.64]},source_diversity:{baseline_24h_avg:11,baseline_7d_avg:10,points:[9,9,10,11,11,12]},correction_rate:{baseline_24h_avg:.12,baseline_7d_avg:.15,points:[.16,.15,.13,.12,.11,.09]},cross_source_coherence:{baseline_24h_avg:.49,baseline_7d_avg:.45,points:[.41,.43,.46,.49,.53,.57]},uncertainty_index:{baseline_24h_avg:.44,baseline_7d_avg:.49,points:[.52,.49,.47,.44,.41,.38]}}};
-  const explainFallback={label:'Metric',definition:'Explanation unavailable.',drivers:[],caveats:['No explain payload in this environment.']};
-
-  let fixtureMode='live';
-  const toneMap={low:'tone-ok',moderate:'tone-warn',mixed:'tone-warn',healthy:'tone-ok',elevated:'tone-risk',improving:'tone-ok',degraded:'tone-risk'};
-
-  const fallbackMetricLabel=(k)=>k.split('_').map(p=>p[0].toUpperCase()+p.slice(1)).join(' ');
-  const getMetricCard=(cards,key)=>cards.find(c=>c.key===key)||{key,label:fallbackMetricLabel(key),value:null,display:'Unavailable',unit:key==='source_diversity'?'count':'ratio',delta_vs_prior_window:null,delta_direction:'flat',status:'degraded',sparkline:[]};
-  const formatDeltaText=(d,u)=>d==null?'No comparison':(u==='percent'?`${d>0?'+':''}${Math.round(d*100)}% vs prior window`:u==='ratio'?`${d>0?'+':''}${d.toFixed(2)} vs prior window`:`${d>0?'+':''}${d} vs prior window`);
-  const toTitleCase=(v)=>v.split(/[_\s-]+/).map(p=>p[0].toUpperCase()+p.slice(1)).join(' ');
-  const formatUtc=(iso)=>{const d=new Date(iso);return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')} ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`;};
-  const mapStatus=(s)=>!s||s.ingestion==='healthy'?{show:false,title:'',items:[]}:(s.ingestion==='degraded'?{show:true,title:'Feed degradation detected',items:s.notes}:{show:true,title:'Feed ingestion unavailable',items:s.notes});
-
-  function mapDashboardResponseToViewModel(r){
-    return {header:{title:r.banner.title,subtitle:r.banner.subtitle,disclaimer:r.banner.disclaimer,windowLabel:r.meta.window.label,windowStart:r.meta.window.start,windowEnd:r.meta.window.end,refreshLabel:`Refresh cadence: ${Math.round(r.meta.refresh_seconds/60)} min`,modeLabel:`Mode: ${r.meta.mode.replace(/_/g,' ')}`,generatedAt:r.meta.generated_at},metricCards:metricCardOrder.map(k=>{const c=getMetricCard(r.metrics.cards,k);return{key:c.key,title:c.label,valueText:c.display,deltaText:formatDeltaText(c.delta_vs_prior_window,c.unit),status:c.status,sparkline:c.sparkline,disabled:c.value===null,explainPath:c.explain_path};}),composition:{title:r.composition.title,rows:r.composition.items.map(i=>({key:i.key,label:i.label,percent:i.share,percentText:i.display,countText:String(i.cluster_count??i.count??0),href:i.event_path}))},eventTape:{title:r.recent_events.title,rows:r.recent_events.items.map(i=>({key:i.event_id,timeUtc:formatUtc(i.observed_at),region:i.region,category:toTitleCase(i.category),summary:i.summary,severity:i.severity,confidenceText:`${Math.round(i.confidence*100)}%`,sourceCountText:`${i.source_count} sources`,confirmationState:i.confirmation_state,correctionState:i.correction_state,href:i.detail_path})),empty:r.recent_events.items.length===0},notes:r.notes,method:r.method_snapshot,statusBanner:mapStatus(r.system_status)};
+  function pushMt7Sample() {
+    const axis = randomAxis();
+    const summit = Math.random() < 0.35;
+    history = (history.length > 240 ? history.slice(-240) : history).concat({
+      ts: new Date().toISOString(), axis, summit,
+      brittleness: maxMag(axis) >= 2.5,
+      checksum: checksumAxis(axis),
+      trace: [{ hub: 'X', flipped_axis: 'order', class_shift: summit ? 'changed' : 'unchanged', interpretive_note: 'Synthetic mirror pass trace' }]
+    });
+    renderMt7();
+    if (demoMode) setTimeout(pushMt7Sample, intervalMs);
   }
 
-  const sparkSvg=(points,color)=>{ if(!points?.length) return '<svg viewBox="0 0 100 20"></svg>'; const min=Math.min(...points),max=Math.max(...points); const d=points.map((v,i)=>`${i?'L':'M'} ${(i/(points.length-1))*100},${max===min?10:20-((v-min)/(max-min))*20}`).join(' '); return `<svg viewBox="0 0 100 20" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="${color}" stroke-width="2"/></svg>`; };
-
-  async function apiFetch(path,fallback){ try{ const r=await fetch(path,{headers:{Accept:'application/json'}}); if(!r.ok) throw new Error(); return await r.json(); } catch { return fallback; } }
-
-  async function openExplain(card){ const data=await apiFetch(card.explainPath||'',explainFallback); document.getElementById('drawerTitle').textContent=`${data.label||card.title} · explain`; document.getElementById('drawerSummary').textContent=data.definition||''; const tbody=document.getElementById('clusterRows'); tbody.innerHTML=''; (data.drivers||[]).forEach(d=>{const tr=document.createElement('tr'); tr.innerHTML=`<td>${d.cluster_id||'—'}</td><td>${d.headline||'—'}</td><td>${d.contribution??'—'}</td>`; tbody.appendChild(tr);}); if(!(data.drivers||[]).length) tbody.innerHTML='<tr><td colspan="3">No metric drivers returned.</td></tr>'; const cave=document.getElementById('caveats'); cave.innerHTML=''; (data.caveats||[]).forEach(c=>{const li=document.createElement('li'); li.textContent=c; cave.appendChild(li);}); document.getElementById('drawer').classList.add('open'); }
-
-  function renderSignals(vm,history){
-    document.getElementById('bannerTitle').textContent=vm.header.title;
-    document.getElementById('bannerSubtitle').textContent=vm.header.subtitle;
-    document.getElementById('mainDisclaimer').innerHTML=`<strong>Non-predictive use only:</strong> ${vm.header.disclaimer}`;
-    document.getElementById('windowMeta').innerHTML=`<div><strong>Window:</strong> ${vm.header.windowStart} → ${vm.header.windowEnd} (${vm.header.windowLabel})</div><div><strong>Generated:</strong> ${vm.header.generatedAt}</div><div>${vm.header.refreshLabel} · ${vm.header.modeLabel}</div>`;
-    const db=document.getElementById('degradedBanner'); db.classList.toggle('show',vm.statusBanner.show); if(vm.statusBanner.show) db.innerHTML=`<strong>${vm.statusBanner.title}</strong> ${vm.statusBanner.items.join(' · ')}`;
-
-    const m=document.getElementById('metrics'); m.innerHTML=''; vm.metricCards.forEach(card=>{ const el=document.createElement('button'); el.className='metric'; el.disabled=card.disabled; el.innerHTML=`<div class="k">${card.title}</div><div class="v ${toneMap[card.status]||'tone-warn'}">${card.valueText}</div><div class="meta">${card.deltaText} · ${card.status}</div>`; el.addEventListener('click',()=>openExplain(card)); m.appendChild(el); }); if(!vm.metricCards.length) m.innerHTML='<div class="small muted">No metric cards available.</div>';
-
-    document.getElementById('compositionTitle').textContent=vm.composition.title; const c=document.getElementById('composition'); c.innerHTML=''; vm.composition.rows.forEach(r=>{ const el=document.createElement(r.href?'a':'div'); el.className='bar'; if(r.href){el.href=r.href;el.style.color='inherit';el.style.textDecoration='none';} el.innerHTML=`<div class="row between"><span class="small">${r.label}</span><span class="small muted">${r.countText} · ${r.percentText}</span></div><div class="track"><div class="fill" style="width:${Math.round(r.percent*100)}%"></div></div>`; c.appendChild(el); }); if(!vm.composition.rows.length)c.innerHTML='<div class="small muted">No composition data.</div>';
-
-    const s=document.getElementById('trendSparks'); s.innerHTML=''; vm.metricCards.forEach(card=>{ const series=history.series?.[card.key]||{baseline_24h_avg:'n/a',baseline_7d_avg:'n/a',points:card.sparkline}; const row=document.createElement('div'); row.className='spark-row'; const color=(toneMap[card.status]==='tone-risk')?'#ff7a7a':(toneMap[card.status]==='tone-ok')?'#5de39b':'#ffbe5c'; row.innerHTML=`<div class="spark-label">${card.title}</div><div class="sparkline">${sparkSvg(series.points,color)}</div><div class="delta ${toneMap[card.status]||''}">24h:${series.baseline_24h_avg} · 7d:${series.baseline_7d_avg}</div>`; s.appendChild(row); });
-
-    const t=document.getElementById('eventTape'); t.innerHTML=''; vm.eventTape.rows.forEach(r=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.timeUtc}</td><td>${r.region}</td><td><span class="pill">${r.category}</span></td><td>${r.summary}</td><td><span class="pill sev-${r.severity}">${r.severity.toUpperCase()}</span></td><td>${r.confidenceText}</td><td>${r.sourceCountText}</td><td>${r.confirmationState}</td><td>${r.correctionState}</td>`; tr.style.cursor='pointer'; tr.addEventListener('click',()=>window.open(r.href,'_blank')); t.appendChild(tr); }); document.getElementById('eventsTitle').textContent=vm.eventTape.title; document.getElementById('eventTapeEmpty').style.display=vm.eventTape.empty?'block':'none';
-
-    const rc={}; vm.eventTape.rows.forEach(r=>{rc[r.region]=(rc[r.region]||0)+1}); const regions=document.getElementById('regions'); regions.innerHTML=''; const total=vm.eventTape.rows.length||1; Object.entries(rc).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{const li=document.createElement('li'); li.innerHTML=`<span>${k}</span><strong>${Math.round(v/total*100)}%</strong>`; regions.appendChild(li);}); if(!Object.keys(rc).length) regions.innerHTML='<li><span>No events</span><strong>0%</strong></li>';
-
-    document.getElementById('notesTitle').textContent=vm.notes.title; const notes=document.getElementById('notes'); notes.innerHTML=''; vm.notes.items.forEach(i=>{const li=document.createElement('li'); li.textContent=i; notes.appendChild(li);});
-    document.getElementById('methodTitle').textContent=vm.method.title; const method=document.getElementById('method'); method.innerHTML=''; vm.method.items.forEach(i=>{const li=document.createElement('li'); li.textContent=i; method.appendChild(li);});
+  async function refreshSignals() {
+    const { dashboard, history } = await loadDashboardResponse({ fixtureMode });
+    const vm = mapDashboardResponseToViewModel(dashboard);
+    renderLiveSignalsBoard(vm, history);
   }
 
-  async function loadLiveSignals(){
-    const dashboard=await apiFetch('/api/dashboard?window=6h',mockDashboardResponse);
-    const hist=await apiFetch('/api/metrics/history?window=6h&compare=24h,7d',historyFallback);
-    const events=await apiFetch('/api/events?window=6h&sort=observed_at:desc&limit=50',dashboard.recent_events);
-    const composition=await apiFetch('/api/composition?window=6h',dashboard.composition);
-    const merged={...dashboard,recent_events:{...dashboard.recent_events,items:events.items||dashboard.recent_events.items},composition:{...dashboard.composition,items:composition.items||dashboard.composition.items}};
-    renderSignals(mapDashboardResponseToViewModel(merged),hist);
-  }
+  document.querySelectorAll('[data-fixture]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      document.querySelectorAll('[data-fixture]').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      fixtureMode = btn.dataset.fixture;
+      await refreshSignals();
+    });
+  });
 
-  function loadFixture(name){ const src=name==='degraded'?degradedDashboardResponse:name==='empty'?emptyDashboardResponse:mockDashboardResponse; renderSignals(mapDashboardResponseToViewModel(src),historyFallback); }
-  async function refreshSignals(){ if(fixtureMode==='live') await loadLiveSignals(); else loadFixture(fixtureMode); }
+  document.getElementById('closeDrawer').addEventListener('click', () => document.getElementById('drawer').classList.remove('open'));
+  document.getElementById('drawer').addEventListener('click', (e) => { if (e.target.id === 'drawer') e.target.classList.remove('open'); });
 
-  document.querySelectorAll('[data-fixture]').forEach(btn=>btn.addEventListener('click',async()=>{document.querySelectorAll('[data-fixture]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');fixtureMode=btn.dataset.fixture;await refreshSignals();}));
-  document.getElementById('closeDrawer').addEventListener('click',()=>document.getElementById('drawer').classList.remove('open')); document.getElementById('drawer').addEventListener('click',e=>{if(e.target.id==='drawer')e.target.classList.remove('open')});
-
-  document.getElementById('spinBtn').addEventListener('click',()=>{rotating=!rotating;document.getElementById('spinBtn').textContent=rotating?'Pause Spin':'Spin Radar';renderMt7();});
-  document.getElementById('modeBtn').addEventListener('click',()=>{demoMode=!demoMode;document.getElementById('modeBtn').textContent=demoMode?'Live':'Demo'; if(demoMode) pushMt7Sample();});
-  document.getElementById('streamBtn').addEventListener('click',()=>{useSSE=!useSSE;document.getElementById('streamBtn').textContent=useSSE?'SSE':'WS';renderMt7();});
-  document.getElementById('summitBtn').addEventListener('click',()=>{showSummits=!showSummits;document.getElementById('summitBtn').textContent=showSummits?'Hide Summits':'Show Summits';renderMt7();});
-  intervalEl.addEventListener('change',()=>{intervalMs=Math.max(400,Number(intervalEl.value)||1200)});
+  document.getElementById('spinBtn').addEventListener('click', () => { rotating = !rotating; document.getElementById('spinBtn').textContent = rotating ? 'Pause Spin' : 'Spin Radar'; renderMt7(); });
+  document.getElementById('modeBtn').addEventListener('click', () => { demoMode = !demoMode; document.getElementById('modeBtn').textContent = demoMode ? 'Live' : 'Demo'; if (demoMode) pushMt7Sample(); });
+  document.getElementById('streamBtn').addEventListener('click', () => { useSSE = !useSSE; document.getElementById('streamBtn').textContent = useSSE ? 'SSE' : 'WS'; renderMt7(); });
+  document.getElementById('summitBtn').addEventListener('click', () => { showSummits = !showSummits; document.getElementById('summitBtn').textContent = showSummits ? 'Hide Summits' : 'Show Summits'; renderMt7(); });
+  intervalEl.addEventListener('change', () => { intervalMs = Math.max(400, Number(intervalEl.value) || 1200); });
 
   pushMt7Sample();
   refreshSignals();
-  setInterval(()=>{ if(fixtureMode==='live') loadLiveSignals(); },300000);
-  window.__fixtures__={mockDashboardResponse,degradedDashboardResponse,emptyDashboardResponse};
+  setInterval(() => { if (fixtureMode === 'live') refreshSignals(); }, 300000);
+
+  window.__fixtures__ = { mockDashboardResponse, degradedDashboardResponse, emptyDashboardResponse, getDashboardFixture, historyFallback };
 </script>
 </body>
 </html>
