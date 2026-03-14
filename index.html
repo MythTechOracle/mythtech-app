@@ -29,24 +29,7 @@
 </head>
 <body>
   <main class="wrap grid">
-    <section class="panel grid">
-      <div class="between">
-        <div><h1>Weaver's Loom — MT-07 v0.3.3-TPF</h1><div class="muted small">Primary MT-07 shell + extracted Live Signals module stack.</div></div>
-        <div class="row">
-          <button class="btn" id="spinBtn">Pause Spin</button><button class="btn" id="modeBtn">Live</button><button class="btn" id="streamBtn">SSE</button><button class="btn" id="summitBtn">Hide Summits</button>
-        </div>
-      </div>
-      <div class="cols-3">
-        <div class="panel"><div class="small muted">Base URL</div><input id="baseUrl" value="http://localhost:8787" /></div>
-        <div class="panel"><div class="small muted">Sampling Interval (demo ms)</div><input id="intervalMs" type="number" min="400" step="100" value="1200" /></div>
-        <div class="panel"><div class="small muted">MT-07 Status</div><div class="row" id="mt7Status"></div></div>
-      </div>
-      <div class="cols-2">
-        <div class="panel"><div class="between"><h3>Axis Radar</h3><span class="small muted">clamped ±3</span></div><svg id="radar" class="chart" viewBox="0 0 320 280"></svg></div>
-        <div class="panel"><div class="between"><h3>Tension Timeline</h3><span class="small muted">max |axis| + summit bands</span></div><svg id="timeline" class="chart" viewBox="0 0 560 280"></svg></div>
-      </div>
-      <div class="panel"><div class="between"><h3>Mirror Trace (last cycle)</h3><span class="small muted">flip → drift → clamp</span></div><div id="traceList" class="grid"></div></div>
-    </section>
+    <div id="mt07ShellHost"></div>
 
     <section class="panel grid">
       <div class="between">
@@ -79,84 +62,87 @@
   import { loadDashboardResponse } from './src/live-signals/data.js';
   import { getDashboardFixture, historyFallback, mockDashboardResponse, degradedDashboardResponse, emptyDashboardResponse } from './src/live-signals/fixtures.js';
   import { renderLiveSignalsBoard } from './src/live-signals/components/LiveSignalsBoard.js';
+  import { renderMT07InstrumentShell } from './src_mt07_MT07InstrumentShell.js';
 
-  // MT-07 host shell state & helpers (kept local by design).
   const clamp = (v, min = -3, max = 3) => Math.max(min, Math.min(max, v));
   const canonical = (a) => ({ chaos: clamp(a.chaos), order: clamp(a.order), narrative: clamp(a.narrative), time: clamp(a.time) });
   const randomAxis = () => canonical({ chaos: Math.random() * 6 - 3, order: Math.random() * 6 - 3, narrative: Math.random() * 6 - 3, time: Math.random() * 6 - 3 });
   const maxMag = (a) => Math.max(Math.abs(a.chaos), Math.abs(a.order), Math.abs(a.narrative), Math.abs(a.time));
   const checksumAxis = (ax) => Math.abs(Math.floor((ax.chaos + 3) * 1000 + (ax.order + 3) * 100 + (ax.narrative + 3) * 10 + (ax.time + 3))).toString(36);
-  const badge = (label, cls = '') => `<span class="badge ${cls}">${label}</span>`;
 
-  let demoMode = true;
-  let rotating = true;
-  let useSSE = true;
-  let showSummits = true;
-  let intervalMs = 1200;
-  let history = [];
-  let fixtureMode = 'live';
+  let state = {
+    baseUrl: 'http://localhost:8787',
+    demoMode: true,
+    rotating: true,
+    intervalMs: 1200,
+    useSSE: true,
+    showSummits: true,
+    history: [],
+    fixtureMode: 'live'
+  };
 
-  const intervalEl = document.getElementById('intervalMs');
-
-  function drawRadar(axis) {
-    const svg = document.getElementById('radar');
-    const c = { x: 160, y: 140 }; const R = 95;
-    const pts = [['chaos', 0], ['order', Math.PI / 2], ['narrative', Math.PI], ['time', -Math.PI / 2]];
-    let poly = '';
-    pts.forEach(([k, a]) => { const v = (axis[k] + 3) / 6; poly += `${c.x + Math.cos(a) * R * v},${c.y + Math.sin(a) * R * v} `; });
-    svg.innerHTML = `<circle cx="${c.x}" cy="${c.y}" r="${R}" fill="none" stroke="#334155"/>${pts.map(([k, a]) => `<line x1="${c.x}" y1="${c.y}" x2="${c.x + Math.cos(a) * R}" y2="${c.y + Math.sin(a) * R}" stroke="#243442"/><text x="${c.x + Math.cos(a) * (R + 16)}" y="${c.y + Math.sin(a) * (R + 16)}" fill="#8da4b6" font-size="10" text-anchor="middle">${k}</text>`).join('')}<polygon points="${poly}" fill="rgba(167,139,250,.3)" stroke="#a78bfa" stroke-width="2"/>`;
-    svg.style.transform = rotating ? `rotate(${Date.now() / 120}deg)` : 'none';
+  function deriveMt07View() {
+    const last = state.history[state.history.length - 1] || {
+      axis: { chaos: 0, order: 0, narrative: 0, time: 0 },
+      summit: false,
+      brittleness: false,
+      checksum: 'n/a',
+      trace: []
+    };
+    const lineData = state.history.map((h, i) => ({ i, max: maxMag(h.axis), summit: h.summit }));
+    const summitBands = lineData.filter((d) => d.summit).map((d) => ({ x1: d.i - 0.4, x2: d.i + 0.4 }));
+    return { last, lineData, summitBands };
   }
 
-  function drawTimeline(items) {
-    const svg = document.getElementById('timeline');
-    const W = 560, H = 280, p = 20;
-    if (!items.length) { svg.innerHTML = ''; return; }
-    const n = items.length - 1 || 1;
-    const toX = (i) => p + (i / n) * (W - p * 2);
-    const toY = (v) => H - p - (v / 3) * (H - p * 2);
-    const line = items.map((d, i) => `${i ? 'L' : 'M'} ${toX(i)} ${toY(d.max)}`).join(' ');
-    const bands = showSummits ? items.map((d, i) => d.summit ? `<rect x="${toX(i) - 2}" y="${p}" width="4" height="${H - p * 2}" fill="rgba(99,102,241,.2)"/>` : '').join('') : '';
-    svg.innerHTML = `${bands}<path d="${line}" fill="none" stroke="#34d399" stroke-width="2"/>`;
-  }
-
-  function renderMt7() {
-    const last = history[history.length - 1] || { axis: { chaos: 0, order: 0, narrative: 0, time: 0 }, summit: false, brittleness: false, checksum: 'n/a', trace: [] };
-    document.getElementById('mt7Status').innerHTML = [
-      badge(demoMode ? 'Demo' : (useSSE ? 'Live • SSE' : 'Live • WS'), demoMode ? 'warn' : 'ok'),
-      badge(last.summit ? 'Summit' : 'Scanning', last.summit ? 'warn' : 'ok'),
-      badge(last.brittleness ? 'Brittle' : 'Elastic', last.brittleness ? 'risk' : 'ok'),
-      badge(`Relief • ${last.checksum}`)
-    ].join(' ');
-    drawRadar(last.axis);
-    drawTimeline(history.map((h) => ({ max: maxMag(h.axis), summit: h.summit })));
-    document.getElementById('traceList').innerHTML = (last.trace || []).map((t) => `<div class="trace-item"><div class="row">${badge('Hub ' + t.hub)} ${badge('flip: ' + t.flipped_axis)} ${badge('class: ' + t.class_shift, t.class_shift === 'changed' ? 'ok' : '')}</div><div class="small muted">${t.interpretive_note}</div></div>`).join('') || '<div class="small muted">No mirror trace yet.</div>';
+  function renderMt07() {
+    const mount = document.getElementById('mt07ShellHost');
+    const view = deriveMt07View();
+    renderMT07InstrumentShell(mount, {
+      title: "Weaver's Loom — MT-07 v0.3.3-TPF",
+      subtitle: 'Primary instrument shell + extracted Live Signals modules beneath.',
+      baseUrl: state.baseUrl,
+      demoMode: state.demoMode,
+      rotating: state.rotating,
+      intervalMs: state.intervalMs,
+      useSSE: state.useSSE,
+      showSummits: state.showSummits,
+      last: view.last,
+      lineData: view.lineData,
+      summitBands: view.summitBands,
+      onBaseUrlChange: (value) => { state.baseUrl = value; },
+      onToggleDemoMode: () => { state.demoMode = !state.demoMode; if (state.demoMode) pushMt7Sample(); renderMt07(); },
+      onToggleRotating: () => { state.rotating = !state.rotating; renderMt07(); },
+      onIntervalMsChange: (ms) => { state.intervalMs = Math.max(400, ms || 1200); },
+      onToggleUseSSE: () => { state.useSSE = !state.useSSE; renderMt07(); },
+      onToggleShowSummits: () => { state.showSummits = !state.showSummits; renderMt07(); }
+    });
   }
 
   function pushMt7Sample() {
     const axis = randomAxis();
     const summit = Math.random() < 0.35;
-    history = (history.length > 240 ? history.slice(-240) : history).concat({
-      ts: new Date().toISOString(), axis, summit,
+    state.history = (state.history.length > 240 ? state.history.slice(-240) : state.history).concat({
+      ts: new Date().toISOString(),
+      axis,
+      summit,
       brittleness: maxMag(axis) >= 2.5,
       checksum: checksumAxis(axis),
       trace: [{ hub: 'X', flipped_axis: 'order', class_shift: summit ? 'changed' : 'unchanged', interpretive_note: 'Synthetic mirror pass trace' }]
     });
-    renderMt7();
-    if (demoMode) setTimeout(pushMt7Sample, intervalMs);
+    renderMt07();
+    if (state.demoMode) setTimeout(pushMt7Sample, state.intervalMs);
   }
 
   async function refreshSignals() {
-    const { dashboard, history } = await loadDashboardResponse({ fixtureMode });
-    const vm = mapDashboardResponseToViewModel(dashboard);
-    renderLiveSignalsBoard(vm, history);
+    const { dashboard, history } = await loadDashboardResponse({ fixtureMode: state.fixtureMode });
+    renderLiveSignalsBoard(mapDashboardResponseToViewModel(dashboard), history);
   }
 
   document.querySelectorAll('[data-fixture]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       document.querySelectorAll('[data-fixture]').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
-      fixtureMode = btn.dataset.fixture;
+      state.fixtureMode = btn.dataset.fixture;
       await refreshSignals();
     });
   });
@@ -164,15 +150,9 @@
   document.getElementById('closeDrawer').addEventListener('click', () => document.getElementById('drawer').classList.remove('open'));
   document.getElementById('drawer').addEventListener('click', (e) => { if (e.target.id === 'drawer') e.target.classList.remove('open'); });
 
-  document.getElementById('spinBtn').addEventListener('click', () => { rotating = !rotating; document.getElementById('spinBtn').textContent = rotating ? 'Pause Spin' : 'Spin Radar'; renderMt7(); });
-  document.getElementById('modeBtn').addEventListener('click', () => { demoMode = !demoMode; document.getElementById('modeBtn').textContent = demoMode ? 'Live' : 'Demo'; if (demoMode) pushMt7Sample(); });
-  document.getElementById('streamBtn').addEventListener('click', () => { useSSE = !useSSE; document.getElementById('streamBtn').textContent = useSSE ? 'SSE' : 'WS'; renderMt7(); });
-  document.getElementById('summitBtn').addEventListener('click', () => { showSummits = !showSummits; document.getElementById('summitBtn').textContent = showSummits ? 'Hide Summits' : 'Show Summits'; renderMt7(); });
-  intervalEl.addEventListener('change', () => { intervalMs = Math.max(400, Number(intervalEl.value) || 1200); });
-
   pushMt7Sample();
   refreshSignals();
-  setInterval(() => { if (fixtureMode === 'live') refreshSignals(); }, 300000);
+  setInterval(() => { if (state.fixtureMode === 'live') refreshSignals(); }, 300000);
 
   window.__fixtures__ = { mockDashboardResponse, degradedDashboardResponse, emptyDashboardResponse, getDashboardFixture, historyFallback };
 </script>
