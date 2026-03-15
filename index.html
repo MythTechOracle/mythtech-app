@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Weaver's Loom MT-07 + Live Signals Merge</title>
   <style>
-    :root{--bg:#0b1117;--panel:#131e29;--line:#21384a;--text:#dceaf4;--muted:#8da4b6;--accent:#4ad8ff;--ok:#5de39b;--warn:#ffbe5c;--risk:#ff7a7a}
+    :root{--bg:#0b1117;--panel:#131e29;--line:#21384a;--text:#dceaf4;--muted:#8da4b6;--accent:#4ad8ff;--ok:#5de39b;--warn:#ffbe5c;--risk:#ff7a7a;--divider-cyan-soft:rgba(34,211,238,.18);--divider-cyan-mid:rgba(34,211,238,.38);--divider-cyan-strong:rgba(34,211,238,.55);--divider-slate:rgba(148,163,184,.18)}
     *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at top,#122131,#0b1117 48%);color:var(--text)}
     .wrap{max-width:1280px;margin:0 auto;padding:20px}.panel{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px}.grid{display:grid;gap:12px}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.between{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -23,14 +23,29 @@
     .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:.72rem}.sev-high{color:var(--risk)}.sev-medium{color:var(--warn)}.sev-low{color:var(--ok)}
     .spark-row{display:grid;grid-template-columns:170px 1fr 140px;gap:8px;align-items:center}.sparkline{height:24px;border:1px solid var(--line);border-radius:6px}
     .drawer{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-end}.drawer.open{display:flex}.drawer-card{background:#0f1821;border-top:1px solid var(--line);padding:14px;width:100%;max-height:70vh;overflow:auto}
+    .module-transition{display:flex;align-items:center;gap:1rem;margin-top:.5rem;padding-top:.25rem}
+    .module-transition__line{flex:1 1 auto;height:1px;background:linear-gradient(90deg,rgba(34,211,238,0),var(--divider-cyan-mid),rgba(34,211,238,0));box-shadow:0 0 18px rgba(34,211,238,.12)}
+    .module-transition__label{flex:0 0 auto;padding:.375rem .875rem;border:1px solid var(--divider-cyan-soft);border-radius:9999px;background:linear-gradient(180deg,rgba(15,23,42,.88),rgba(2,6,23,.96));color:rgba(186,230,253,.9);font-size:.6875rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap}
+    .live-signals-shell-offset{margin-top:1rem}
+    .live-signals-board{position:relative;border-radius:1.25rem}
+    .live-signals-board::before{content:"";position:absolute;left:1rem;right:1rem;top:-.625rem;height:1px;background:linear-gradient(90deg,rgba(34,211,238,0),var(--divider-cyan-strong),rgba(34,211,238,0));opacity:.65;pointer-events:none}
+    .live-signals-board__header{margin-bottom:1rem}
+    .live-signals-board__eyebrow{margin-bottom:.35rem;color:rgba(125,211,252,.78);font-size:.6875rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+    .live-signals-board__title-block{padding-bottom:.5rem;border-bottom:1px solid var(--divider-slate)}
     @media (max-width:1100px){.cols-3,.cols-2{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.spark-row{grid-template-columns:1fr}}
     @media (max-width:760px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (min-width:1024px){.module-transition{margin-top:.875rem;padding-top:.5rem}.live-signals-shell-offset{margin-top:1.5rem}.live-signals-board__header{margin-bottom:1.25rem}}
   </style>
 </head>
 <body>
   <main class="wrap grid">
     <div id="mt07ShellHost"></div>
-    <div id="liveSignalsHost"></div>
+    <div class="module-transition" aria-hidden="true">
+      <div class="module-transition__line"></div>
+      <div class="module-transition__label">Descriptive monitoring layer</div>
+      <div class="module-transition__line"></div>
+    </div>
+    <div id="liveSignalsHost" class="live-signals-shell-offset"></div>
   </main>
 
 <script type="module">

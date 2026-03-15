@@ -35,9 +35,9 @@ export function renderLiveSignalsBoard(root, props) {
   const method = safeVm?.method?.items ?? [];
 
   root.innerHTML = `
-    <section class="panel grid">
-      <div class="between">
-        <div><h2>${title}</h2><div class="muted small">${subtitle}</div></div>
+    <section class="panel grid live-signals-board">
+      <div class="between live-signals-board__header">
+        <div class="live-signals-board__title-block"><div class="live-signals-board__eyebrow">Secondary module · descriptive overlay</div><h2>${title}</h2><div class="muted small">${subtitle}</div></div>
         <div class="row">
           ${['live_api','mock','degraded','empty'].map((m)=>`<button class="btn ${mode===m?'active':''}" data-ls-mode="${m}">${m.replace('_',' ')}</button>`).join('')}
           <button class="btn" data-ls-refresh>Refresh</button>
