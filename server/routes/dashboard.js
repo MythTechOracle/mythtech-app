@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getSnapshotBundle, getSnapshotSelection, buildSnapshot } from "../services/snapshotService.js";
-import { enrichEventItemsWithTranslation } from "../services/translationService.js";
+import { enrichEventItemsWithTranslation, enrichHeldOutItemsWithTranslation } from "../services/translationService.js";
 import { getRefreshLoopStatus } from "../services/refreshLoopService.js";
 
 const router = Router();
@@ -65,6 +65,9 @@ router.get("/", async (_req, res, next) => {
     const dashboard = applyRefreshLoopMeta(applySnapshotSelectionMeta(bundle.dashboard, selection));
     dashboard.recent_events.items = await enrichEventItemsWithTranslation(
       dashboard.recent_events?.items || []
+    );
+    dashboard.held_out_field.items = await enrichHeldOutItemsWithTranslation(
+      dashboard.held_out_field?.items || []
     );
     res.json(dashboard);
   } catch (error) {

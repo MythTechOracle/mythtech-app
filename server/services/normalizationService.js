@@ -357,6 +357,103 @@ const DIPLOMATIC_CRISIS_PATTERNS = [
   /urgent talks/u
 ];
 
+const RAW_TONE_TO_DISPLAY = {
+  neutral: "procedural",
+  curious: "exploratory",
+  frustrated: "hardening",
+  defensive: "guarded"
+};
+
+const TONE_CLASS_ORDER = ["neutral", "curious", "frustrated", "defensive"];
+const TONE_ENTROPY_MAX = Math.log2(TONE_CLASS_ORDER.length);
+
+const TONE_TERM_MAP = {
+  neutral: [
+    "advisory",
+    "clarified",
+    "confirms",
+    "coordination",
+    "guidance",
+    "maintenance",
+    "meeting",
+    "notice",
+    "operator",
+    "operational",
+    "procedural",
+    "recovery",
+    "restore",
+    "restored",
+    "scheduled",
+    "service recovery",
+    "status",
+    "technical talks",
+    "update"
+  ],
+  curious: [
+    "assessing",
+    "considering",
+    "consultation",
+    "dialogue",
+    "exploring",
+    "inquiry",
+    "monitoring",
+    "probe",
+    "review",
+    "seeking",
+    "sounding out",
+    "studying",
+    "under review",
+    "watching"
+  ],
+  frustrated: [
+    "attack",
+    "clash",
+    "condemns",
+    "crisis",
+    "escalation",
+    "flare up",
+    "hostile",
+    "missile",
+    "mobilization",
+    "offensive",
+    "retaliate",
+    "retaliation",
+    "sanction",
+    "shelling",
+    "strike",
+    "threat",
+    "threatens",
+    "warning"
+  ],
+  defensive: [
+    "air defense",
+    "alert",
+    "brace",
+    "closed airspace",
+    "contain",
+    "containment",
+    "curfew",
+    "denies",
+    "guard",
+    "intercept",
+    "protect",
+    "restriction",
+    "security measure",
+    "shelter",
+    "shield",
+    "withstand"
+  ]
+};
+
+const CATEGORY_TONE_PRIORS = {
+  security: { frustrated: 0.2, defensive: 0.14 },
+  diplomacy: { neutral: 0.14, curious: 0.12 },
+  infrastructure: { neutral: 0.16, defensive: 0.08 },
+  cyber: { defensive: 0.14, frustrated: 0.08 },
+  policy: { neutral: 0.12, curious: 0.1 },
+  information: { curious: 0.08, defensive: 0.06 }
+};
+
 const ENTERTAINMENT_TERMS = [
   "actor",
   "album",
@@ -1120,6 +1217,158 @@ function countTermMatches(text = "", terms = []) {
 function hasPatternMatch(text = "", patterns = []) {
   const lowered = toSearchText(text);
   return patterns.some((pattern) => pattern.test(lowered));
+}
+
+function collectTermMatches(text = "", terms = []) {
+  const lowered = toSearchText(text);
+  if (!lowered) {
+    return [];
+  }
+
+  return terms.filter((term) => lowered.includes(toSearchText(term)));
+}
+
+function normalizeToneProbabilities(probabilities) {
+  const entries = TONE_CLASS_ORDER.map((key) => [
+    key,
+    Math.max(0, Number(probabilities?.[key] || 0))
+  ]);
+  const total = entries.reduce((sum, [, value]) => sum + value, 0);
+  if (!total) {
+    const fallback = 1 / TONE_CLASS_ORDER.length;
+    return Object.fromEntries(TONE_CLASS_ORDER.map((key) => [key, Number(fallback.toFixed(4))]));
+  }
+
+  const normalized = {};
+  let remainder = 1;
+  TONE_CLASS_ORDER.forEach((key, index) => {
+    const raw = entries[index][1] / total;
+    const rounded = index === TONE_CLASS_ORDER.length - 1
+      ? remainder
+      : Number(raw.toFixed(4));
+    normalized[key] = Number(Math.max(0, rounded).toFixed(4));
+    remainder = Number((remainder - normalized[key]).toFixed(4));
+  });
+
+  if (remainder !== 0) {
+    normalized[TONE_CLASS_ORDER[TONE_CLASS_ORDER.length - 1]] = Number(
+      (normalized[TONE_CLASS_ORDER[TONE_CLASS_ORDER.length - 1]] + remainder).toFixed(4)
+    );
+  }
+
+  return normalized;
+}
+
+function calculateToneEntropy(probabilities) {
+  let entropy = 0;
+  for (const key of TONE_CLASS_ORDER) {
+    const probability = Number(probabilities?.[key] || 0);
+    if (probability <= 0) {
+      continue;
+    }
+
+    entropy -= probability * Math.log2(probability);
+  }
+
+  return Number(entropy.toFixed(4));
+}
+
+function classifyToneState({ entropyNorm, topToneConfidence, toneMargin, evidenceCount }) {
+  if (!evidenceCount) {
+    return "insufficient_basis";
+  }
+
+  if (topToneConfidence >= 0.5 && toneMargin >= 0.14 && entropyNorm <= 0.72) {
+    return "concentrated";
+  }
+
+  if (entropyNorm >= 0.9 || toneMargin <= 0.08 || topToneConfidence < 0.36) {
+    return "diffuse";
+  }
+
+  return "mixed";
+}
+
+function buildToneProfile({ comparisonText = "", category = "information" } = {}) {
+  const toneText = normalizeWhitespace(stripTranslationWrappers(stripUrls(comparisonText)));
+  const loweredText = toSearchText(toneText);
+  const tokenCount = tokenize(toneText).length;
+  const categoryPriors = CATEGORY_TONE_PRIORS[category] || {};
+  const scores = {
+    neutral: 0.9 + (categoryPriors.neutral || 0),
+    curious: 0.82 + (categoryPriors.curious || 0),
+    frustrated: 0.82 + (categoryPriors.frustrated || 0),
+    defensive: 0.82 + (categoryPriors.defensive || 0)
+  };
+  const toneSignals = [];
+
+  for (const toneKey of TONE_CLASS_ORDER) {
+    const matches = collectTermMatches(loweredText, TONE_TERM_MAP[toneKey] || []);
+    for (const match of matches) {
+      scores[toneKey] += 0.5;
+      toneSignals.push(match);
+    }
+  }
+
+  if (/\b(question|questions|unclear|uncertain|under review)\b/u.test(loweredText)) {
+    scores.curious += 0.24;
+    toneSignals.push("uncertainty cue");
+  }
+
+  if (/\b(denies|rejects|intercepts?|curfew|restriction|closed airspace|air defense)\b/u.test(loweredText)) {
+    scores.defensive += 0.28;
+    toneSignals.push("guarded posture");
+  }
+
+  if (/\b(attack|missile|strike|retaliat|warning|threat|mobilization|shelling)\b/u.test(loweredText)) {
+    scores.frustrated += 0.32;
+    toneSignals.push("hardening posture");
+  }
+
+  if (/\b(advisory|clarified|coordination|meeting|scheduled|status|recovery|restore)\b/u.test(loweredText)) {
+    scores.neutral += 0.26;
+    toneSignals.push("procedural posture");
+  }
+
+  const evidenceSignals = [...new Set(toneSignals)];
+  const evidenceCount = evidenceSignals.length;
+  const rawProbabilities = evidenceCount
+    ? normalizeToneProbabilities(scores)
+    : normalizeToneProbabilities({
+        neutral: 0.25,
+        curious: 0.25,
+        frustrated: 0.25,
+        defensive: 0.25
+      });
+  const ordered = [...TONE_CLASS_ORDER]
+    .map((key) => [key, rawProbabilities[key]])
+    .sort((left, right) => right[1] - left[1]);
+  const [topToneRaw, topToneConfidenceRaw] = ordered[0];
+  const secondToneConfidence = ordered[1]?.[1] || 0;
+  const topToneConfidence = Number(topToneConfidenceRaw.toFixed(4));
+  const toneMargin = Number((topToneConfidence - secondToneConfidence).toFixed(4));
+  const toneEntropy = calculateToneEntropy(rawProbabilities);
+  const toneEntropyNorm = Number((toneEntropy / TONE_ENTROPY_MAX).toFixed(4));
+  const toneState = tokenCount < 3
+    ? "insufficient_basis"
+    : classifyToneState({
+        entropyNorm: toneEntropyNorm,
+        topToneConfidence,
+        toneMargin,
+        evidenceCount
+      });
+
+  return {
+    raw_probabilities: rawProbabilities,
+    top_tone_raw: topToneRaw,
+    top_tone_display: RAW_TONE_TO_DISPLAY[topToneRaw] || topToneRaw,
+    top_tone_confidence: toneState === "insufficient_basis" ? Number(topToneConfidence.toFixed(4)) : topToneConfidence,
+    tone_margin: toneMargin,
+    tone_entropy: toneEntropy,
+    tone_entropy_norm: toneEntropyNorm,
+    tone_state: toneState,
+    tone_signals: evidenceSignals.slice(0, 6)
+  };
 }
 
 function hostnameFromUrl(urlValue = "") {
@@ -1986,6 +2235,10 @@ function finalizeNormalizedItem(seed, options = {}) {
     fieldRelevance: seed.fieldRelevance,
     noiseScore: seed.noiseScore
   });
+  const toneProfile = buildToneProfile({
+    comparisonText: translatedComparisonText || seed.originalComparisonText || comparisonText,
+    category: seed.category
+  });
 
   return {
     rawId: seed.rawId,
@@ -2052,6 +2305,8 @@ function finalizeNormalizedItem(seed, options = {}) {
     fieldRelevance: seed.fieldRelevance,
     escalationFlags,
     escalationSignal,
+    toneProfile,
+    tone_profile: toneProfile,
     eventLikeness,
     incidentActorTokens: incidentIdentity.incidentActorTokens,
     incidentTargetTokens: incidentIdentity.incidentTargetTokens,

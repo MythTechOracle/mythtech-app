@@ -38,6 +38,10 @@ function formatTemporalState(value) {
   return String(value || "unknown").replace(/_/g, " ");
 }
 
+function formatToneState(value) {
+  return String(value || "insufficient_basis").replace(/_/g, " ");
+}
+
 function renderTemporalWindowRead(entry) {
   if (!entry) {
     return "";
@@ -258,6 +262,14 @@ export function renderLiveSignalsBoard(root, props) {
           <button class="btn" data-ls-close>Close</button>
         </div>
         <p class="muted" data-ls-drawer-summary></p>
+        <div class="panel panel-muted small" data-ls-tone-context style="display:none">
+          <div class="panel-heading">
+            <h3>Tone context</h3>
+            <span class="small muted" data-ls-tone-state></span>
+          </div>
+          <div class="small muted" data-ls-tone-summary></div>
+          <div class="small muted" data-ls-tone-meta style="margin-top:6px"></div>
+        </div>
         <div class="panel panel-muted small" data-ls-temporal style="display:none">
           <div class="panel-heading">
             <h3>Temporal read</h3>
@@ -456,6 +468,8 @@ export function renderLiveSignalsBoard(root, props) {
     const listItem = document.createElement("li");
     listItem.innerHTML = `
       <strong>${escapeHtml(item.summary)}</strong>
+      ${item.translationNote ? `<div class="small muted">${escapeHtml(item.translationNote)}</div>` : ""}
+      ${item.originalSummary ? `<div class="small muted">Original: ${escapeHtml(item.originalSummary)}</div>` : ""}
       <div class="small muted">${escapeHtml(item.region)} | ${escapeHtml(item.category)} | ${escapeHtml(item.supportText)}</div>
       <div class="small muted">Held out for ${escapeHtml(item.primaryReason)} | Conf ${escapeHtml(item.confidenceText)} | ${escapeHtml(item.severity)}</div>
     `;
@@ -542,6 +556,23 @@ async function openExplain(root, card, explain) {
     listItem.textContent = caveat;
     caveatsRoot.appendChild(listItem);
   });
+
+  const toneContextRoot = root.querySelector("[data-ls-tone-context]");
+  const toneContext = explainData.tone_context || null;
+  if (toneContext) {
+    toneContextRoot.style.display = "block";
+    root.querySelector("[data-ls-tone-state]").textContent = formatToneState(
+      toneContext.tone_state
+    );
+    root.querySelector("[data-ls-tone-summary]").textContent = toneContext.summary_note || "";
+    root.querySelector("[data-ls-tone-meta]").textContent =
+      `Top tone: ${toneContext.top_tone_display || "-"} | Confidence ${Math.round((toneContext.top_tone_confidence || 0) * 100)}% | Entropy ${Number(toneContext.tone_entropy_norm || 0).toFixed(2)}`;
+  } else {
+    toneContextRoot.style.display = "none";
+    root.querySelector("[data-ls-tone-state]").textContent = "";
+    root.querySelector("[data-ls-tone-summary]").textContent = "";
+    root.querySelector("[data-ls-tone-meta]").textContent = "";
+  }
 
   const temporalRoot = root.querySelector("[data-ls-temporal]");
   const temporalRead = explainData.temporal_read || null;

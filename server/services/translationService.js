@@ -117,3 +117,27 @@ export async function enrichEventItemsWithTranslation(items = []) {
 
   return translatedItems;
 }
+
+export async function enrichHeldOutItemsWithTranslation(items = []) {
+  const translatedItems = [];
+
+  for (const item of items) {
+    const observedUpdate = String(item.observed_update || "").trim();
+    const translation = await translateTextToEnglish(observedUpdate);
+
+    translatedItems.push({
+      ...item,
+      observed_update_original: observedUpdate,
+      observed_update_translated: translation.translated ? translation.translatedText : null,
+      translation: {
+        applied: translation.translated,
+        source_language: translation.sourceLanguage,
+        source_language_label: translation.sourceLanguageLabel,
+        note: translation.note,
+        provider: translation.provider
+      }
+    });
+  }
+
+  return translatedItems;
+}

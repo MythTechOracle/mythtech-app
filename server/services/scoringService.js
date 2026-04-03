@@ -41,6 +41,20 @@ const MOMENT_REASON_LABELS = {
   non_event_infrastructure: "non-event infrastructure wording"
 };
 
+const TONE_STATE_LABELS = {
+  concentrated: "concentrated",
+  mixed: "mixed",
+  diffuse: "diffuse",
+  insufficient_basis: "insufficient basis"
+};
+
+const TONE_DISPLAY_READS = {
+  procedural: "procedural",
+  exploratory: "exploratory",
+  hardening: "hardening",
+  guarded: "guarded"
+};
+
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
@@ -780,6 +794,181 @@ function momentDomainLabel(category) {
   return MOMENT_DOMAIN_LABELS[category] || categoryLabels[category]?.toLowerCase() || String(category);
 }
 
+function clusterSurvivesHardReject(cluster) {
+  const reasons = cluster.suppression_reasons || [];
+  return !reasons.some((reason) => HARD_REJECT_REASONS.has(reason));
+}
+
+function toneStateLabel(value) {
+  return TONE_STATE_LABELS[value] || String(value || "insufficient basis").replace(/_/g, " ");
+}
+
+function describeToneSummary(toneMetrics, options = {}) {
+  if (!toneMetrics || toneMetrics.tone_state === "insufficient_basis") {
+    return "Tone basis is too thin to support a stable language-pressure read.";
+  }
+
+  const toneLabel = TONE_DISPLAY_READS[toneMetrics.top_tone_display] || toneMetrics.top_tone_display || "mixed";
+  const confidence = Math.round((toneMetrics.top_tone_confidence || 0) * 100);
+  const stateLabel = toneStateLabel(toneMetrics.tone_state);
+
+  if (toneMetrics.tone_state === "concentrated") {
+    return `Language posture is ${stateLabel} around ${toneLabel} phrasing (${confidence}% top-tone confidence).`;
+  }
+
+  if (toneMetrics.tone_state === "diffuse") {
+    return `Language posture is ${stateLabel}; ${toneLabel} cues are present but not settled enough to sharpen the read.`;
+  }
+
+  const context = options.context === "escalation"
+    ? "it does not overrule support or escalation authority"
+    : "it does not overrule the field";
+  return `Language posture is ${stateLabel}, leaning ${toneLabel}; ${context}.`;
+}
+
+function buildToneMetrics(scoredClusters = [], visibleSampleState = "empty") {
+  const basisClusters = scoredClusters.filter((cluster) =>
+    clusterSurvivesHardReject(cluster) &&
+    (cluster.cluster_tone_basis_item_count || 0) > 0
+  );
+  const basisVisibleCount = basisClusters.filter((cluster) => cluster.visible_in_tape).length;
+
+  if (visibleSampleState === "empty" || !basisClusters.length) {
+    return {
+      top_tone_display: null,
+      top_tone_confidence: 0,
+      tone_entropy_norm: 1,
+      tone_state: "insufficient_basis",
+      basis_cluster_count: basisClusters.length,
+      basis_visible_count: basisVisibleCount,
+      summary_note: "Tone basis is too thin to support a stable language-pressure read."
+    };
+  }
+
+  const totals = {
+    neutral: 0,
+    curious: 0,
+    frustrated: 0,
+    defensive: 0
+  };
+  let totalWeight = 0;
+
+  for (const cluster of basisClusters) {
+    const usableWeight = Math.max(
+      0.05,
+      (cluster.support_score || cluster.source_family_count || 1) *
+        Math.max(0.1, cluster.event_likeness || 0.5)
+    );
+    const rawProbabilities = cluster.tone_profile?.raw_probabilities || {};
+    totalWeight += usableWeight;
+    for (const key of Object.keys(totals)) {
+      totals[key] += Number(rawProbabilities[key] || 0) * usableWeight;
+    }
+  }
+
+  const averaged = Object.fromEntries(
+    Object.entries(totals).map(([key, value]) => [
+      key,
+      Number((value / Math.max(totalWeight, 0.01)).toFixed(4))
+    ])
+  );
+  const ordered = Object.entries(averaged).sort((left, right) => right[1] - left[1]);
+  const [topToneRaw, topToneConfidenceRaw] = ordered[0];
+  const secondConfidence = ordered[1]?.[1] || 0;
+  const topToneConfidence = Number(topToneConfidenceRaw.toFixed(4));
+  const toneMargin = Number((topToneConfidence - secondConfidence).toFixed(4));
+  const toneEntropy = Number(
+    (-Object.values(averaged).reduce((sum, probability) => {
+      if (!probability) {
+        return sum;
+      }
+      return sum + probability * Math.log2(probability);
+    }, 0)).toFixed(4)
+  );
+  const toneEntropyNorm = Number((toneEntropy / Math.log2(4)).toFixed(4));
+  const toneState =
+    topToneConfidence >= 0.5 && toneMargin >= 0.14 && toneEntropyNorm <= 0.72
+      ? "concentrated"
+      : toneEntropyNorm >= 0.9 || toneMargin <= 0.08 || topToneConfidence < 0.36
+        ? "diffuse"
+        : "mixed";
+
+  const toneMetrics = {
+    top_tone_display: {
+      neutral: "procedural",
+      curious: "exploratory",
+      frustrated: "hardening",
+      defensive: "guarded"
+    }[topToneRaw] || topToneRaw,
+    top_tone_confidence: topToneConfidence,
+    tone_entropy_norm: toneEntropyNorm,
+    tone_state: toneState,
+    basis_cluster_count: basisClusters.length,
+    basis_visible_count: basisVisibleCount,
+    summary_note: ""
+  };
+  toneMetrics.summary_note = describeToneSummary(toneMetrics);
+  return toneMetrics;
+}
+
+function buildToneDrivers(clusters = [], limit = 5) {
+  return [...clusters]
+    .filter((cluster) =>
+      clusterSurvivesHardReject(cluster) &&
+      (cluster.cluster_tone_basis_item_count || 0) > 0
+    )
+    .sort((left, right) => {
+      const confidenceDiff =
+        (right.cluster_top_tone_confidence || 0) - (left.cluster_top_tone_confidence || 0);
+      if (Math.abs(confidenceDiff) > 0.0001) {
+        return confidenceDiff;
+      }
+
+      return (left.cluster_tone_entropy_norm || 0) - (right.cluster_tone_entropy_norm || 0);
+    })
+    .slice(0, limit)
+    .map((cluster) => ({
+      cluster_id: cluster.cluster_id,
+      headline: cluster.observed_update,
+      tone_posture: cluster.cluster_top_tone_display || "-",
+      confidence: `${Math.round((cluster.cluster_top_tone_confidence || 0) * 100)}%`,
+      entropy: Number(cluster.cluster_tone_entropy_norm || 0).toFixed(2)
+    }));
+}
+
+function buildToneContext(toneMetrics, options = {}) {
+  return {
+    top_tone_display: toneMetrics.top_tone_display,
+    top_tone_confidence: toneMetrics.top_tone_confidence,
+    tone_entropy_norm: toneMetrics.tone_entropy_norm,
+    tone_state: toneMetrics.tone_state,
+    summary_note: describeToneSummary(toneMetrics, options)
+  };
+}
+
+function buildToneSentenceForTree(toneMetrics, options = {}) {
+  if (!toneMetrics || toneMetrics.tone_state === "insufficient_basis") {
+    return "Tone basis remains too thin to sharpen the read.";
+  }
+
+  const toneLabel = TONE_DISPLAY_READS[toneMetrics.top_tone_display] || toneMetrics.top_tone_display;
+  if (toneMetrics.tone_state === "concentrated" && toneLabel === "hardening") {
+    return options.narrow
+      ? "Language posture is hardening, but support remains narrow."
+      : "Language posture is hardening, though it remains bounded by current support.";
+  }
+
+  if (toneMetrics.tone_state === "concentrated" && toneLabel === "procedural") {
+    return "Language posture remains procedural despite the active field.";
+  }
+
+  if (toneMetrics.tone_state === "diffuse") {
+    return "Language posture is mixed and does not sharpen the current call.";
+  }
+
+  return `Language posture leans ${toneLabel} without overruling the field.`;
+}
+
 function buildMomentResolve({
   scoredClusters = [],
   visibleClusters = [],
@@ -787,6 +976,7 @@ function buildMomentResolve({
   visibleSampleState,
   surfaceRecoveryMode,
   metrics,
+  toneMetrics = null,
   temporalState = null,
   modeTag = null
 }) {
@@ -818,7 +1008,7 @@ function buildMomentResolve({
 
   const base = {
     title: "Tree of Relief — Moment Resolve",
-    subtitle: "Narrative resolve of the present window, not a forecast.",
+    subtitle: "Narrative audit of the present window, not a forecast.",
     state,
     state_label: state.replace(/_/g, " "),
     lines: {}
@@ -833,7 +1023,7 @@ function buildMomentResolve({
           what_formed: "A fallback continuity surface is carrying the board while live detail is constrained.",
           what_held: "Delayed or unavailable feeds reduced confirmation, comparison strength, or field breadth.",
           what_resolves: "Read this cycle as operationally useful but partially degraded.",
-          what_remains_open: "More may be present than the current surface can verify."
+          what_remains_open: `${buildToneSentenceForTree(toneMetrics)} More may be present than the current surface can verify.`
         }
       };
     case "residue_present":
@@ -843,7 +1033,7 @@ function buildMomentResolve({
         lines: {
           what_formed: "The active window appears calmer than the wider memory around it.",
           what_held: "Recent windows retain hardening pressure even though the present surface is more contained.",
-          what_resolves: "Read this cycle as contained at the surface with pressure residue still in memory.",
+          what_resolves: `Read this cycle as contained at the surface with pressure residue still in memory. ${buildToneSentenceForTree(toneMetrics)}`,
           what_remains_open: "The field is quieter now, but it has not fully cleared its recent strain."
         }
       };
@@ -861,8 +1051,10 @@ function buildMomentResolve({
           what_held: heldOutCount
             ? `${heldOutCount} additional clusters were seen but refused, most often for ${humanSuppressionReason}.`
             : "Supporting candidates stayed limited, so little else could earn visible appearance.",
-          what_resolves: "Read this cycle as narrow and provisional, not as a broad field conclusion.",
-          what_remains_open: "The field remains active, but present evidence does not justify a wider directional claim."
+          what_resolves: `Read this cycle as narrow and provisional, not as a broad field conclusion. ${buildToneSentenceForTree(toneMetrics, { narrow: true })}`,
+          what_remains_open: toneMetrics?.tone_state === "insufficient_basis"
+            ? "The field remains active, but present evidence does not justify a wider directional claim."
+            : "The field remains active, but present evidence does not justify a wider directional claim."
         }
       };
     case "provisional":
@@ -874,7 +1066,7 @@ function buildMomentResolve({
           what_held: heldOutCount
             ? `${heldOutCount} refused clusters stayed large relative to what earned appearance, led by ${humanSuppressionReason}.`
             : "Visible clusters formed, but supporting breadth remained limited.",
-          what_resolves: "Read this cycle as a partial field read, not a settled surface.",
+          what_resolves: `Read this cycle as a partial field read, not a settled surface. ${buildToneSentenceForTree(toneMetrics, { narrow: true })}`,
           what_remains_open: "Local evidence is present, but the broader pattern remains under-supported."
         }
       };
@@ -887,7 +1079,7 @@ function buildMomentResolve({
           what_held: heldOutCount
             ? `Selection remained strict, but enough authority survived to keep ${heldOutCount} refused clusters from defining the whole window.`
             : "Selection remained strict, and enough authority survived to show a wider field.",
-          what_resolves: "Read this cycle as materially active and broader than a single-thread window.",
+          what_resolves: `Read this cycle as materially active and broader than a single-thread window. ${buildToneSentenceForTree(toneMetrics)}`,
           what_remains_open: "The field is wider than usual, but individual clusters still carry uneven certainty."
         }
       };
@@ -900,7 +1092,7 @@ function buildMomentResolve({
           what_held: heldOutCount
             ? `${heldOutCount} clusters were refused for limited authority, support, or geographic clarity, led by ${humanSuppressionReason}.`
             : "Supporting candidates stayed limited in authority or support.",
-          what_resolves: "Read this cycle as contained pressure rather than an active break.",
+          what_resolves: `Read this cycle as contained pressure rather than an active break. ${buildToneSentenceForTree(toneMetrics)}`,
           what_remains_open: "Residual movement may still sit beneath the present calm."
         }
       };
@@ -1143,7 +1335,7 @@ function buildHistory(metrics) {
   };
 }
 
-function buildExplain(metrics, clusters, escalation) {
+function buildExplain(metrics, clusters, escalation, toneMetrics) {
   const distinctFeedNames = new Set();
   const distinctFeedFamilies = new Set();
   const clusterCount = Math.max(1, clusters.length);
@@ -1208,6 +1400,7 @@ function buildExplain(metrics, clusters, escalation) {
     .slice(0, 5)
     .map(({ _confidence, ...driver }) => driver);
   const sourceDiversityDrivers = buildSourceDiversityDrivers(clusters, 25);
+  const toneDrivers = buildToneDrivers(clusters, 5);
   const escalationDrivers = escalation.contributingClusters.slice(0, 5).map((cluster) => ({
     cluster_id: cluster.cluster_id,
     headline: `${cluster.observed_update} (${escalationDriverLabels(cluster).slice(0, 2).join(", ") || "Escalation texture"})`,
@@ -1242,10 +1435,12 @@ function buildExplain(metrics, clusters, escalation) {
         weighted_severity_total: weightedSeverityTotal,
         correction_cluster_count: correctionClusterCount
       },
+      tone_context: buildToneContext(toneMetrics, { context: "volatility" }),
       drivers: volatilityDrivers,
       caveats: [
         "Volatility rises with concentrated high-severity clustering, not just raw event count.",
-        "Correction-tracked clusters add interpretive caution but do not dominate the volatility score."
+        "Correction-tracked clusters add interpretive caution but do not dominate the volatility score.",
+        "Tone describes rhetorical posture only and does not change volatility scoring in this pass."
       ]
     },
     source_diversity: {
@@ -1314,11 +1509,42 @@ function buildExplain(metrics, clusters, escalation) {
         contributing_cluster_count: escalation.contributingClusters.length,
         visible_contributor_count: escalation.visibleContributorCount
       },
+      tone_context: buildToneContext(toneMetrics, { context: "escalation" }),
       drivers: escalationDrivers,
       caveats: [
         "Infrastructure strain alone does not imply escalation pressure.",
         "Escalation Pressure is descriptive only and does not forecast intent or outcomes.",
-        "Thin or provisional samples are damped to avoid over-reading narrow windows."
+        "Thin or provisional samples are damped to avoid over-reading narrow windows.",
+        "Tone may describe rhetorical posture, but it does not overrule support or escalation authority."
+      ]
+    },
+    tone_pressure: {
+      metric_key: "tone_pressure",
+      label: "Tone Pressure",
+      window: "6h",
+      value: toneMetrics.tone_entropy_norm,
+      definition: "Describes how concentrated or diffuse the field's live language posture is in the active window.",
+      formula_human: "Weighted cluster tone distribution summarized by top tone, confidence, and normalized tone entropy.",
+      inputs: {
+        basis_cluster_count: toneMetrics.basis_cluster_count,
+        basis_visible_count: toneMetrics.basis_visible_count,
+        top_tone_display: toneMetrics.top_tone_display,
+        top_tone_confidence: toneMetrics.top_tone_confidence,
+        tone_entropy_norm: toneMetrics.tone_entropy_norm
+      },
+      tone_context: buildToneContext(toneMetrics),
+      driver_columns: [
+        { key: "cluster_id", label: "Cluster", width: "18%" },
+        { key: "headline", label: "Headline", width: "46%" },
+        { key: "tone_posture", label: "Tone posture", width: "16%" },
+        { key: "confidence", label: "Confidence", width: "10%" },
+        { key: "entropy", label: "Entropy", width: "10%" }
+      ],
+      drivers: toneDrivers,
+      caveats: [
+        "Tone reads wording pressure, not event truth.",
+        "High tone concentration is not the same thing as high event confidence.",
+        "Tone remains descriptive-only and does not affect tape appearance in this pass."
       ]
     }
   };
@@ -1384,6 +1610,7 @@ export function scoreDashboardBundle({
   const visibleSampleState = surfaceSelection.visibleSampleState;
   const visibleSampleNote = sampleStateNote(visibleSampleState);
   const regionalConcentration = computeRegionalShares(eventItems);
+  const toneMetrics = buildToneMetrics(scoredClusters, visibleSampleState);
 
   const signalVelocity = clamp(clusterCount * 12, 0, weights.signalVelocityCap);
   const weightedSeverity = scoredClusters.reduce((sum, cluster) => {
@@ -1436,6 +1663,7 @@ export function scoreDashboardBundle({
     visibleSampleState,
     surfaceRecoveryMode: surfaceSelection.surfaceRecoveryMode,
     metrics,
+    toneMetrics,
     temporalState,
     modeTag
   });
@@ -1487,6 +1715,7 @@ export function scoreDashboardBundle({
       category_items: categoryEventItems
     },
     held_out_field: heldOutField,
+    tone_metrics: toneMetrics,
     tree_of_relief: treeOfRelief,
     notes: {
       title: "Volatility Notes",
@@ -1520,6 +1749,8 @@ export function scoreDashboardBundle({
       surface_recovery_mode: surfaceSelection.surfaceRecoveryMode,
       provisional_visible_count: surfaceSelection.provisionalVisibleCount,
       moment_resolve_state: treeOfRelief.state,
+      tone_state: toneMetrics.tone_state,
+      tone_basis_cluster_count: toneMetrics.basis_cluster_count,
       escalation_pressure: escalation.value,
       escalation_contributor_count: escalation.contributingClusters.length
     }
@@ -1528,6 +1759,6 @@ export function scoreDashboardBundle({
   return {
     dashboard,
     history: buildHistory(metrics),
-    explain: buildExplain(metrics, scoredClusters, escalation)
+    explain: buildExplain(metrics, scoredClusters, escalation, toneMetrics)
   };
 }

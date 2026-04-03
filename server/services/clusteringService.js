@@ -58,6 +58,15 @@ const ESCALATION_FLAG_KEYS = [
   "diplomaticCrisisLike"
 ];
 
+const TONE_CLASS_ORDER = ["neutral", "curious", "frustrated", "defensive"];
+const RAW_TONE_TO_DISPLAY = {
+  neutral: "procedural",
+  curious: "exploratory",
+  frustrated: "hardening",
+  defensive: "guarded"
+};
+const TONE_ENTROPY_MAX = Math.log2(TONE_CLASS_ORDER.length);
+
 const CATEGORY_PRIORITY = {
   security: 5,
   infrastructure: 4,
@@ -179,6 +188,126 @@ function makeClusterId(cluster) {
 function average(values = []) {
   if (!values.length) return 0;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function calculateToneEntropy(probabilities) {
+  let entropy = 0;
+  for (const key of TONE_CLASS_ORDER) {
+    const probability = Number(probabilities?.[key] || 0);
+    if (probability <= 0) {
+      continue;
+    }
+
+    entropy -= probability * Math.log2(probability);
+  }
+
+  return Number(entropy.toFixed(4));
+}
+
+function classifyToneState({ entropyNorm, topToneConfidence, toneMargin, evidenceCount }) {
+  if (!evidenceCount) {
+    return "insufficient_basis";
+  }
+
+  if (topToneConfidence >= 0.5 && toneMargin >= 0.14 && entropyNorm <= 0.72) {
+    return "concentrated";
+  }
+
+  if (entropyNorm >= 0.9 || toneMargin <= 0.08 || topToneConfidence < 0.36) {
+    return "diffuse";
+  }
+
+  return "mixed";
+}
+
+function aggregateToneProfiles(items = []) {
+  const toneBearingItems = items
+    .filter((item) => item?.toneProfile || item?.tone_profile)
+    .map((item) => {
+      const profile = item.toneProfile || item.tone_profile;
+      const weight = Math.max(
+        0.05,
+        Number(item.sourceConfidence || item.source_confidence || 0.55) *
+          Math.max(0.1, Number(item.eventLikeness || 0.5))
+      );
+      return {
+        profile,
+        weight
+      };
+    });
+
+  if (!toneBearingItems.length) {
+    return {
+      raw_probabilities: Object.fromEntries(TONE_CLASS_ORDER.map((key) => [key, 0.25])),
+      top_tone_raw: "neutral",
+      top_tone_display: RAW_TONE_TO_DISPLAY.neutral,
+      top_tone_confidence: 0.25,
+      tone_margin: 0,
+      tone_entropy: 1,
+      tone_entropy_norm: 1,
+      tone_state: "insufficient_basis",
+      tone_signals: [],
+      basis_item_count: 0
+    };
+  }
+
+  const totals = Object.fromEntries(TONE_CLASS_ORDER.map((key) => [key, 0]));
+  let totalWeight = 0;
+  const signalCounts = new Map();
+  let evidenceCount = 0;
+
+  for (const { profile, weight } of toneBearingItems) {
+    const usableWeight = Math.max(0.01, weight);
+    totalWeight += usableWeight;
+    if (profile.tone_state !== "insufficient_basis") {
+      evidenceCount += 1;
+    }
+
+    for (const key of TONE_CLASS_ORDER) {
+      totals[key] += Number(profile.raw_probabilities?.[key] || 0) * usableWeight;
+    }
+
+    for (const signal of profile.tone_signals || []) {
+      signalCounts.set(signal, (signalCounts.get(signal) || 0) + usableWeight);
+    }
+  }
+
+  const rawProbabilities = {};
+  for (const key of TONE_CLASS_ORDER) {
+    rawProbabilities[key] = Number(((totals[key] || 0) / Math.max(totalWeight, 0.01)).toFixed(4));
+  }
+
+  const ordered = [...TONE_CLASS_ORDER]
+    .map((key) => [key, rawProbabilities[key]])
+    .sort((left, right) => right[1] - left[1]);
+  const [topToneRaw, topToneConfidenceRaw] = ordered[0];
+  const secondToneConfidence = ordered[1]?.[1] || 0;
+  const topToneConfidence = Number(topToneConfidenceRaw.toFixed(4));
+  const toneMargin = Number((topToneConfidence - secondToneConfidence).toFixed(4));
+  const toneEntropy = calculateToneEntropy(rawProbabilities);
+  const toneEntropyNorm = Number((toneEntropy / TONE_ENTROPY_MAX).toFixed(4));
+  const toneState = classifyToneState({
+    entropyNorm: toneEntropyNorm,
+    topToneConfidence,
+    toneMargin,
+    evidenceCount
+  });
+
+  return {
+    raw_probabilities: rawProbabilities,
+    top_tone_raw: topToneRaw,
+    top_tone_display: RAW_TONE_TO_DISPLAY[topToneRaw] || topToneRaw,
+    top_tone_confidence: topToneConfidence,
+    tone_margin: toneMargin,
+    tone_entropy: toneEntropy,
+    tone_entropy_norm: toneEntropyNorm,
+    tone_state: toneState,
+    tone_signals: [...signalCounts.entries()]
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 6)
+      .map(([signal]) => signal),
+    basis_item_count: evidenceCount
+  };
 }
 
 function actionTokens(tokens = []) {
@@ -706,6 +835,7 @@ export function buildClusters(items = [], options = {}) {
       const representativeNoiseFlags = cluster.representativeNoiseFlags || {};
       const representativeRelevanceFlags = cluster.representativeRelevanceFlags || {};
       const representativeEscalationFlags = cluster.representativeEscalationFlags || {};
+      const toneProfile = aggregateToneProfiles(cluster.items);
       const fieldRelevance = Number(
         Math.max(cluster.representativeFieldRelevance || 0, average(cluster.fieldRelevanceValues)).toFixed(2)
       );
@@ -803,6 +933,14 @@ export function buildClusters(items = [], options = {}) {
         contains_translated_item: cluster.containsTranslatedItem || false,
         representative_noise_flags: representativeNoiseFlags,
         field_relevance: fieldRelevance,
+        tone_profile: toneProfile,
+        cluster_top_tone_raw: toneProfile.top_tone_raw,
+        cluster_top_tone_display: toneProfile.top_tone_display,
+        cluster_top_tone_confidence: toneProfile.top_tone_confidence,
+        cluster_tone_entropy_norm: toneProfile.tone_entropy_norm,
+        cluster_tone_state: toneProfile.tone_state,
+        cluster_tone_signals: toneProfile.tone_signals,
+        cluster_tone_basis_item_count: toneProfile.basis_item_count,
         escalation_signal: escalationSignal,
         escalation_support_score: escalationSupportScore,
         escalation_flags: escalationFlags,

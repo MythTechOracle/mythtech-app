@@ -209,7 +209,9 @@ export function mapDashboardResponseToViewModel(response) {
       })),
       items: (response.held_out_field?.items || []).map((item) => ({
         key: item.cluster_id,
-        summary: item.observed_update,
+        summary: item.observed_update_translated || item.observed_update,
+        originalSummary: item.observed_update_translated ? item.observed_update_original || item.observed_update : "",
+        translationNote: item.translation?.applied ? item.translation.note || "Machine-translated to English" : "",
         region: item.region || item.country || "Unknown",
         category: toTitleCase(item.category),
         severity: toTitleCase(item.severity || "low"),
@@ -222,11 +224,22 @@ export function mapDashboardResponseToViewModel(response) {
       })),
       empty: (response.held_out_field?.held_out_count || 0) === 0,
     },
+    toneMetrics: response.tone_metrics
+      ? {
+          topToneDisplay: response.tone_metrics.top_tone_display || "",
+          topToneConfidence: response.tone_metrics.top_tone_confidence || 0,
+          toneEntropyNorm: response.tone_metrics.tone_entropy_norm ?? 1,
+          toneState: response.tone_metrics.tone_state || "insufficient_basis",
+          basisClusterCount: response.tone_metrics.basis_cluster_count || 0,
+          basisVisibleCount: response.tone_metrics.basis_visible_count || 0,
+          summaryNote: response.tone_metrics.summary_note || "",
+        }
+      : null,
     treeOfRelief: response.tree_of_relief
       ? {
           title: response.tree_of_relief.title || "Tree of Relief — Moment Resolve",
           subtitle:
-            response.tree_of_relief.subtitle || "Narrative resolve of the present window, not a forecast.",
+            response.tree_of_relief.subtitle || "Narrative audit of the present window, not a forecast.",
           state: response.tree_of_relief.state || "contained",
           stateLabel: toTitleCase(response.tree_of_relief.state_label || response.tree_of_relief.state || "contained"),
           lines: [

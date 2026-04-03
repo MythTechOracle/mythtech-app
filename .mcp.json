@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "signal-app-readonly": {
+      "command": "node",
+      "args": [
+        "scripts/mcp/signal-app-readonly.mjs"
+      ],
+      "env": {
+        "SIGNAL_APP_BASE_URL": "${SIGNAL_APP_BASE_URL:-http://localhost:8787}",
+        "DB_PATH": "${DB_PATH:-./data/live-signals.sqlite}"
+      }
+    }
+  }
+}

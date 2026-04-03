@@ -319,7 +319,9 @@ function buildMockHeldOutField() {
         region: "Central Europe",
         country: null,
         category: "infrastructure",
-        observed_update: "Regional outage notice remained too local to earn field authority.",
+        observed_update: "地区停电通告仍过于本地化，未能获得场域权威。",
+        observed_update_original: "地区停电通告仍过于本地化，未能获得场域权威。",
+        observed_update_translated: "Regional outage notice remained too local to earn field authority.",
         severity: "medium",
         confidence: 0.76,
         source_count: 2,
@@ -327,6 +329,13 @@ function buildMockHeldOutField() {
         signal_strength: 0.51,
         primary_suppression_reason: "low_field_authority",
         suppression_reasons: ["low_field_authority"],
+        translation: {
+          applied: true,
+          source_language: "zh-CN",
+          source_language_label: "Chinese",
+          note: "Machine-translated to English from Chinese",
+          provider: "google-translate-web"
+        }
       },
     ],
   };
@@ -390,18 +399,56 @@ function buildDegradedHeldOutField() {
   };
 }
 
+function buildFixtureToneMetrics(mode = "mock") {
+  if (mode === "degraded") {
+    return {
+      top_tone_display: "guarded",
+      top_tone_confidence: 0.44,
+      tone_entropy_norm: 0.88,
+      tone_state: "diffuse",
+      basis_cluster_count: 5,
+      basis_visible_count: 3,
+      summary_note: "Language posture is diffuse, leaning guarded; delayed feeds keep the tone read provisional.",
+    };
+  }
+
+  if (mode === "empty") {
+    return {
+      top_tone_display: null,
+      top_tone_confidence: 0,
+      tone_entropy_norm: 1,
+      tone_state: "insufficient_basis",
+      basis_cluster_count: 0,
+      basis_visible_count: 0,
+      summary_note: "Tone basis is too thin to support a stable language-pressure read.",
+    };
+  }
+
+  return {
+    top_tone_display: "hardening",
+    top_tone_confidence: 0.58,
+    tone_entropy_norm: 0.66,
+    tone_state: "mixed",
+    basis_cluster_count: 5,
+    basis_visible_count: 5,
+    summary_note: "Language posture is mixed, leaning hardening; it does not overrule the field.",
+  };
+}
+
 function buildFixtureTreeOfRelief(mode = "mock") {
+  const toneMetrics = buildFixtureToneMetrics(mode);
+
   if (mode === "degraded") {
     return {
       title: "Tree of Relief — Moment Resolve",
-      subtitle: "Narrative resolve of the present window, not a forecast.",
+      subtitle: "Narrative audit of the present window, not a forecast.",
       state: "degraded",
       state_label: "Degraded",
       lines: {
         what_formed: "A fallback continuity surface is carrying the board while live detail is constrained.",
         what_held: "Delayed feeds reduced confirmation, comparison strength, and field authority across the window.",
         what_resolves: "Read this cycle as operationally useful but partially degraded.",
-        what_remains_open: "More may be present than the current surface can verify."
+        what_remains_open: `${toneMetrics.summary_note} More may be present than the current surface can verify.`
       }
     };
   }
@@ -409,13 +456,13 @@ function buildFixtureTreeOfRelief(mode = "mock") {
   if (mode === "empty") {
     return {
       title: "Tree of Relief — Moment Resolve",
-      subtitle: "Narrative resolve of the present window, not a forecast.",
+      subtitle: "Narrative audit of the present window, not a forecast.",
       state: "thin",
       state_label: "Thin Field",
       lines: {
         what_formed: "No visible clusters earned appearance in the active window; the field remained observationally thin.",
         what_held: "Supporting candidates stayed limited, so little else could earn visible appearance.",
-        what_resolves: "Read this cycle as narrow and provisional, not as a broad field conclusion.",
+        what_resolves: `Read this cycle as narrow and provisional, not as a broad field conclusion. ${toneMetrics.summary_note}`,
         what_remains_open: "The field may still be moving, but this window does not justify a larger claim."
       }
     };
@@ -423,13 +470,13 @@ function buildFixtureTreeOfRelief(mode = "mock") {
 
   return {
     title: "Tree of Relief — Moment Resolve",
-    subtitle: "Narrative resolve of the present window, not a forecast.",
+    subtitle: "Narrative audit of the present window, not a forecast.",
     state: "broad",
     state_label: "Broad Field",
     lines: {
       what_formed: "A multi-domain field took shape with visible activity across security, diplomacy, infrastructure, and cyber lanes.",
       what_held: "Selection remained strict, but enough authority survived to show a wider field rather than a single-thread surface.",
-      what_resolves: "Read this cycle as materially active and broader than a single-thread window.",
+      what_resolves: `Read this cycle as materially active and broader than a single-thread window. ${toneMetrics.summary_note}`,
       what_remains_open: "The field is wider than usual, but individual clusters still carry uneven certainty."
     }
   };
@@ -469,6 +516,13 @@ function buildExplainMap() {
         weighted_severity_total: 8,
         correction_cluster_count: 1,
       },
+      tone_context: {
+        top_tone_display: "hardening",
+        top_tone_confidence: 0.58,
+        tone_entropy_norm: 0.66,
+        tone_state: "mixed",
+        summary_note: "Language posture is mixed, leaning hardening; it does not overrule the field.",
+      },
       drivers: [
         {
           cluster_id: "cl_lev_2201",
@@ -478,6 +532,7 @@ function buildExplainMap() {
       ],
       caveats: [
         "Volatility rises with update density, not just event severity.",
+        "Tone describes rhetorical posture only and does not change volatility scoring in this pass.",
       ],
     },
     source_diversity: {
@@ -518,6 +573,13 @@ function buildExplainMap() {
     escalation_pressure: {
       label: "Escalation Pressure",
       definition: "Descriptive hardening score for state-linked, cross-border, retaliatory, or strategically pressured activity in the active window.",
+      tone_context: {
+        top_tone_display: "hardening",
+        top_tone_confidence: 0.58,
+        tone_entropy_norm: 0.66,
+        tone_state: "mixed",
+        summary_note: "Language posture is mixed, leaning hardening; it does not overrule support or escalation authority.",
+      },
       drivers: [
         {
           cluster_id: "cl_lev_2201",
@@ -533,6 +595,7 @@ function buildExplainMap() {
       caveats: [
         "Infrastructure strain alone does not imply escalation pressure.",
         "Escalation Pressure is descriptive only and not a conflict forecast.",
+        "Tone may describe rhetorical posture, but it does not overrule support or escalation authority.",
       ],
       temporal_read: {
         current_6h: {
@@ -619,6 +682,56 @@ function buildExplainMap() {
           escalation_signal: 0.33,
         },
       },
+    },
+    tone_pressure: {
+      metric_key: "tone_pressure",
+      label: "Tone Pressure",
+      window: "6h",
+      value: 0.66,
+      definition: "Describes how concentrated or diffuse the field's live language posture is in the active window.",
+      formula_human: "Weighted cluster tone distribution summarized by top tone, confidence, and normalized tone entropy.",
+      inputs: {
+        basis_cluster_count: 5,
+        basis_visible_count: 5,
+        top_tone_display: "hardening",
+        top_tone_confidence: 0.58,
+        tone_entropy_norm: 0.66,
+      },
+      tone_context: {
+        top_tone_display: "hardening",
+        top_tone_confidence: 0.58,
+        tone_entropy_norm: 0.66,
+        tone_state: "mixed",
+        summary_note: "Language posture is mixed, leaning hardening; it does not overrule the field.",
+      },
+      driver_columns: [
+        { key: "cluster_id", label: "Cluster", width: "18%" },
+        { key: "headline", label: "Headline", width: "46%" },
+        { key: "tone_posture", label: "Tone posture", width: "16%" },
+        { key: "confidence", label: "Confidence", width: "10%" },
+        { key: "entropy", label: "Entropy", width: "10%" },
+      ],
+      drivers: [
+        {
+          cluster_id: "cl_lev_2201",
+          headline: "Airspace restrictions under clarification",
+          tone_posture: "hardening",
+          confidence: "61%",
+          entropy: "0.58",
+        },
+        {
+          cluster_id: "cl_gulf_9911",
+          headline: "Technical talks cluster carries diplomatic crisis and policy-pressure texture",
+          tone_posture: "guarded",
+          confidence: "49%",
+          entropy: "0.72",
+        },
+      ],
+      caveats: [
+        "Tone reads wording pressure, not event truth.",
+        "High tone concentration is not the same thing as high event confidence.",
+        "Tone remains descriptive-only and does not affect tape appearance in this pass.",
+      ],
     },
     correction_rate: {
       metric_key: "correction_rate",
@@ -744,6 +857,7 @@ function buildBaseDashboard() {
       items: buildMockEventItems(),
     },
     held_out_field: buildMockHeldOutField(),
+    tone_metrics: buildFixtureToneMetrics("mock"),
     tree_of_relief: buildFixtureTreeOfRelief("mock"),
     notes: {
       title: "Volatility Notes",
@@ -799,6 +913,7 @@ export function getDashboardFixture(mode = "mock") {
     );
     dashboard.recent_events.items = buildDegradedEventItems();
     dashboard.held_out_field = buildDegradedHeldOutField();
+    dashboard.tone_metrics = buildFixtureToneMetrics("degraded");
     dashboard.tree_of_relief = buildFixtureTreeOfRelief("degraded");
     dashboard.system_status = {
       ingestion: "degraded",
@@ -816,6 +931,7 @@ export function getDashboardFixture(mode = "mock") {
     dashboard.held_out_field.summary_note = "No held-out clusters in this window.";
     dashboard.held_out_field.top_suppression_reasons = [];
     dashboard.held_out_field.items = [];
+    dashboard.tone_metrics = buildFixtureToneMetrics("empty");
     dashboard.tree_of_relief = buildFixtureTreeOfRelief("empty");
     dashboard.notes.items = ["No qualifying signal clusters were observed in the active window."];
     return dashboard;
@@ -843,21 +959,37 @@ export function getHistoryFixture(mode = "mock") {
 
 export function getExplainFixture(mode = "mock") {
   if (mode === "empty") {
-    return Object.fromEntries(
-      metricCardOrder.map((key) => [
-        key,
-        {
-          label: key.replace(/_/g, " "),
-          definition: "No explain payload is available for an empty window.",
-          drivers: [],
-          caveats: ["No active clusters were observed in the selected window."],
-        },
-      ])
-    );
+    return {
+      ...Object.fromEntries(
+        metricCardOrder.map((key) => [
+          key,
+          {
+            label: key.replace(/_/g, " "),
+            definition: "No explain payload is available for an empty window.",
+            drivers: [],
+            caveats: ["No active clusters were observed in the selected window."],
+          },
+        ])
+      ),
+      tone_pressure: {
+        metric_key: "tone_pressure",
+        label: "Tone Pressure",
+        definition: "No tone explain payload is available for an empty window.",
+        tone_context: buildFixtureToneMetrics("empty"),
+        drivers: [],
+        caveats: ["Tone basis is too thin to support a stable language-pressure read."],
+      },
+    };
   }
 
   const explains = buildExplainMap();
   if (mode === "degraded") {
+    explains.volatility_index.tone_context = buildFixtureToneMetrics("degraded");
+    explains.escalation_pressure.tone_context = {
+      ...buildFixtureToneMetrics("degraded"),
+      summary_note: "Language posture is diffuse, leaning guarded; it does not overrule support or escalation authority.",
+    };
+    explains.tone_pressure.tone_context = buildFixtureToneMetrics("degraded");
     explains.cross_source_coherence = {
       label: "Cross-Source Coherence",
       definition: "Explanation is partially available while feeds are delayed.",
