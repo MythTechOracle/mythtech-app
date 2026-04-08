@@ -3,6 +3,16 @@ export const sourceRegistry = {
     name: "GDELT DOC",
     family: "gdelt",
     confidence: 0.65
+  },
+  rss: {
+    name: "Curated RSS",
+    family: "rss",
+    confidence: 0.55
+  },
+  event_registry: {
+    name: "Event Registry",
+    family: "event_registry",
+    confidence: 0.75
   }
 };
 

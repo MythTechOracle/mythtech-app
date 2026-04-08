@@ -7,6 +7,7 @@
     "db:init": "node ./scripts/init-db.js",
     "ingest:once": "node ./scripts/run-ingest-once.js",
     "ingest:acled:once": "node ./scripts/run-ingest-acled-once.js",
+    "ingest:rss:once": "node ./scripts/run-ingest-rss-once.js",
     "refresh:once": "node ./scripts/run-refresh-live-once.js",
     "snapshot:once": "node ./scripts/run-snapshot-once.js",
     "start:live": "node ./server/index.js"
@@ -16,6 +17,7 @@
     "better-sqlite3": "^12.8.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "fast-xml-parser": "^5.5.11"
   }
 }

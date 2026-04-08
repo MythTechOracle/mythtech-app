@@ -28,6 +28,8 @@ External feeds never touch the board directly. They pass through connectors, nor
 ## Current Backend Capabilities
 
 - basket-driven GDELT-first ingest path with optional ACLED support
+- optional curated RSS watch-feed ingest lane, disabled by default until configured
+- Event Registry reserved as a later shadow-discovery lane and not yet implemented
 - SQLite-backed persistence
 - incident-aware normalization with source-family logic, translation-aware comparison text, and event-geometry separation
 - weighted clustering with cross-category incident merging where incident identity is strong
@@ -120,9 +122,10 @@ MT-07 remains sovereign over what appears as field truth.
 2. Copy `.env.example` to `.env` and set the values you want.
 3. Run `npm run db:init`.
 4. Run `npm run ingest:once`.
-5. Run `npm run snapshot:once`.
-6. Run `npm run start:live`.
-7. Point the front end at `/api`.
+5. Optional: configure `RSS_FEEDS_JSON` and run `npm run ingest:rss:once`.
+6. Run `npm run snapshot:once`.
+7. Run `npm run start:live`.
+8. Point the front end at `/api`.
 
 ## Notes
 
@@ -134,6 +137,10 @@ MT-07 remains sovereign over what appears as field truth.
 - Claude Code repo-side integration plan: [CLAUDE_CODE_SIGNAL_APP_INTEGRATION_PLAN.md](./CLAUDE_CODE_SIGNAL_APP_INTEGRATION_PLAN.md)
 - Claude Agent SDK embed plan: [CLAUDE_AGENT_SDK_SIGNAL_APP_EMBED_PLAN.md](./CLAUDE_AGENT_SDK_SIGNAL_APP_EMBED_PLAN.md)
 - Claude Agent SDK Phase 1 repo skeleton: [CLAUDE_AGENT_SDK_PHASE1_REPO_SKELETON.md](./CLAUDE_AGENT_SDK_PHASE1_REPO_SKELETON.md)
+- MythTech kernel adaptation plan: [MYTHTECH_KERNEL_TO_SIGNAL_APP_ADAPTATION_PLAN.md](./MYTHTECH_KERNEL_TO_SIGNAL_APP_ADAPTATION_PLAN.md)
+- MemPalace adaptation plan: [MEMPALACE_TO_SIGNAL_APP_ADAPTATION_PLAN.md](./MEMPALACE_TO_SIGNAL_APP_ADAPTATION_PLAN.md)
+- RSS and Event Registry fit plan: [RSS_AND_EVENT_REGISTRY_FIT_PLAN.md](./RSS_AND_EVENT_REGISTRY_FIT_PLAN.md)
+- Negotiation geometry matrix fit plan: [NEGOTIATION_GEOMETRY_MATRIX_FIT_PLAN.md](./NEGOTIATION_GEOMETRY_MATRIX_FIT_PLAN.md)
 
 ## Doctrine Seal
 
