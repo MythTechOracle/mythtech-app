@@ -224,6 +224,49 @@ export function mapDashboardResponseToViewModel(response) {
       })),
       empty: (response.held_out_field?.held_out_count || 0) === 0,
     },
+    structuralRead: response.structural_read
+      ? {
+          title: response.structural_read.title || "Structural Read",
+          subtitle:
+            response.structural_read.subtitle || "Analytical map of the present window, not a forecast.",
+          state: response.structural_read.state || "contained",
+          stateLabel: toTitleCase(response.structural_read.state_label || response.structural_read.state || "contained"),
+          basis: response.structural_read.basis || "weak",
+          basisLabel: toTitleCase(response.structural_read.basis_label || response.structural_read.basis || "weak"),
+          lines: [
+            {
+              key: "active_domain",
+              label: "Active domain",
+              text: response.structural_read.lines?.active_domain || "",
+            },
+            {
+              key: "load_bearing_factors",
+              label: "Load-bearing factors",
+              text: response.structural_read.lines?.load_bearing_factors || "",
+            },
+            {
+              key: "constraint_factors",
+              label: "Constraint factors",
+              text: response.structural_read.lines?.constraint_factors || "",
+            },
+            {
+              key: "held_out_pressure",
+              label: "Held-out pressure",
+              text: response.structural_read.lines?.held_out_pressure || "",
+            },
+            {
+              key: "current_structural_state",
+              label: "Current structural state",
+              text: response.structural_read.lines?.current_structural_state || "",
+            },
+            {
+              key: "open_edge",
+              label: "Open edge",
+              text: response.structural_read.lines?.open_edge || "",
+            },
+          ].filter((item) => item.text),
+        }
+      : null,
     toneMetrics: response.tone_metrics
       ? {
           topToneDisplay: response.tone_metrics.top_tone_display || "",

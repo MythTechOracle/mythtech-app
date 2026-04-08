@@ -482,6 +482,63 @@ function buildFixtureTreeOfRelief(mode = "mock") {
   };
 }
 
+function buildFixtureStructuralRead(mode = "mock") {
+  if (mode === "degraded") {
+    return {
+      title: "Structural Read",
+      subtitle: "Analytical map of the present window, not a forecast.",
+      state: "degraded",
+      state_label: "Degraded",
+      basis: "weak",
+      basis_label: "weak",
+      lines: {
+        active_domain: "Fallback continuity surface with partially constrained live authority.",
+        load_bearing_factors: "degraded-mode continuity surface; delayed-feed awareness; operator-safe fallback",
+        constraint_factors: "delayed feeds; reduced comparison strength; weaker field authority",
+        held_out_pressure: "Held-out pressure remains visible, but the degraded surface cannot compress it with full authority.",
+        current_structural_state: "fallback continuity surface; structurally useful, not full live authority.",
+        open_edge: "More may be present than the current surface can safely compress."
+      }
+    };
+  }
+
+  if (mode === "empty") {
+    return {
+      title: "Structural Read",
+      subtitle: "Analytical map of the present window, not a forecast.",
+      state: "insufficient_basis",
+      state_label: "Insufficient Basis",
+      basis: "insufficient",
+      basis_label: "insufficient",
+      lines: {
+        active_domain: "Sparse visible field with pressure held below appearance.",
+        load_bearing_factors: "strict gating; no visible basis cluster; window-level thinness",
+        constraint_factors: "low visible authority; little present structure to compress; active field remains mostly refused",
+        held_out_pressure: "The field may be active underneath, but this window did not surface enough earned appearance to justify structural compression.",
+        current_structural_state: "insufficient structural basis; the window does not support compression beyond thin-state notes.",
+        open_edge: "Wait for a denser window before assigning stronger structure."
+      }
+    };
+  }
+
+  return {
+    title: "Structural Read",
+    subtitle: "Analytical map of the present window, not a forecast.",
+    state: "mixed_watch",
+    state_label: "Mixed Watch",
+    basis: "sufficient",
+    basis_label: "sufficient",
+    lines: {
+      active_domain: "Mixed visible field with security pressure and diplomacy materially present.",
+      load_bearing_factors: "multi-domain visible field; good-enough coherence for guarded compression; watch-level pressure still active",
+      constraint_factors: "held-out pressure remains meaningful; visible authority is not fully settled; some strain remains beneath the surface",
+      held_out_pressure: "Refused clusters are present beneath the surfaced field, so visible calm does not equal full structural resolution.",
+      current_structural_state: "balanced but brittle; pressure is active, but constraints are still materially present.",
+      open_edge: "The field has shape, but it is not yet structurally settled."
+    }
+  };
+}
+
 function buildExplainMap() {
   return {
     signal_velocity: {
@@ -566,7 +623,7 @@ function buildExplainMap() {
         },
       ],
       caveats: [
-        "Showing up to 25 distinct feeds observed in qualified clusters.",
+        "Showing all distinct feeds observed in qualified clusters.",
         "More feeds improve breadth but do not guarantee correctness.",
       ],
     },
@@ -859,6 +916,7 @@ function buildBaseDashboard() {
     held_out_field: buildMockHeldOutField(),
     tone_metrics: buildFixtureToneMetrics("mock"),
     tree_of_relief: buildFixtureTreeOfRelief("mock"),
+    structural_read: buildFixtureStructuralRead("mock"),
     notes: {
       title: "Volatility Notes",
       items: [
@@ -915,6 +973,7 @@ export function getDashboardFixture(mode = "mock") {
     dashboard.held_out_field = buildDegradedHeldOutField();
     dashboard.tone_metrics = buildFixtureToneMetrics("degraded");
     dashboard.tree_of_relief = buildFixtureTreeOfRelief("degraded");
+    dashboard.structural_read = buildFixtureStructuralRead("degraded");
     dashboard.system_status = {
       ingestion: "degraded",
       notes: ["2 of 12 feeds are delayed beyond SLA."],
@@ -933,6 +992,7 @@ export function getDashboardFixture(mode = "mock") {
     dashboard.held_out_field.items = [];
     dashboard.tone_metrics = buildFixtureToneMetrics("empty");
     dashboard.tree_of_relief = buildFixtureTreeOfRelief("empty");
+    dashboard.structural_read = buildFixtureStructuralRead("empty");
     dashboard.notes.items = ["No qualifying signal clusters were observed in the active window."];
     return dashboard;
   }

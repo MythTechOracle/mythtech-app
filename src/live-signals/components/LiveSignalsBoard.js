@@ -89,6 +89,7 @@ export function renderLiveSignalsBoard(root, props) {
     eventTape: { title: "Visible Event Tape", note: "", rows: [], empty: true },
     heldOutField: { title: "Held-Out Field", subtitle: "", count: 0, summary: "", reasons: [], items: [], empty: true },
     treeOfRelief: null,
+    structuralRead: null,
     notes: { title: "Volatility Notes", items: [] },
     method: { title: "Method Snapshot", items: [] },
   };
@@ -109,6 +110,7 @@ export function renderLiveSignalsBoard(root, props) {
     empty: true,
   };
   const treeOfRelief = safeVm.treeOfRelief ?? null;
+  const structuralRead = safeVm.structuralRead ?? null;
   const heldOutReasons = heldOutField.reasons ?? [];
   const heldOutItems = heldOutField.items ?? [];
   const noteItems = safeVm.notes.items ?? [];
@@ -243,6 +245,14 @@ export function renderLiveSignalsBoard(root, props) {
             </div>
             <div class="small muted">${escapeHtml(treeOfRelief?.subtitle || "")}</div>
             <ul class="data-list" data-ls-tree-lines style="margin-top:10px"></ul>
+          </div>
+          <div data-ls-structural-read style="display:${structuralRead ? "block" : "none"}; margin-top:16px; padding-top:16px; border-top:1px solid rgba(148, 163, 184, 0.12);">
+            <div class="panel-heading">
+              <h3>${escapeHtml(structuralRead?.title || "Structural Read")}</h3>
+              <span class="small muted">${escapeHtml(structuralRead ? `${structuralRead.stateLabel} | ${structuralRead.basisLabel} basis` : "")}</span>
+            </div>
+            <div class="small muted">${escapeHtml(structuralRead?.subtitle || "")}</div>
+            <ul class="data-list" data-ls-structural-lines style="margin-top:10px"></ul>
           </div>
         </div>
         <div class="panel">
@@ -492,6 +502,15 @@ export function renderLiveSignalsBoard(root, props) {
       const listItem = document.createElement("li");
       listItem.innerHTML = `<strong>${escapeHtml(item.label)}:</strong> ${escapeHtml(item.text)}`;
       treeLinesRoot.appendChild(listItem);
+    });
+  }
+
+  const structuralLinesRoot = root.querySelector("[data-ls-structural-lines]");
+  if (structuralLinesRoot && structuralRead?.lines?.length) {
+    structuralRead.lines.forEach((item) => {
+      const listItem = document.createElement("li");
+      listItem.innerHTML = `<strong>${escapeHtml(item.label)}:</strong> ${escapeHtml(item.text)}`;
+      structuralLinesRoot.appendChild(listItem);
     });
   }
 

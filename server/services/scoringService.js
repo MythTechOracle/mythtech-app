@@ -1099,6 +1099,187 @@ function buildMomentResolve({
   }
 }
 
+function joinStructuralFactors(factors = [], fallback = "No decisive structural factors surfaced.") {
+  const cleaned = [...new Set(factors.filter(Boolean))];
+  if (!cleaned.length) {
+    return fallback;
+  }
+
+  return cleaned.slice(0, 3).join("; ");
+}
+
+function categoryShare(clusters = [], category) {
+  if (!clusters.length) {
+    return 0;
+  }
+
+  const count = clusters.filter((cluster) => cluster.category === category).length;
+  return count / clusters.length;
+}
+
+function buildStructuralRead({
+  scoredClusters = [],
+  visibleClusters = [],
+  heldOutField,
+  visibleSampleState,
+  surfaceRecoveryMode,
+  metrics,
+  toneMetrics = null,
+  modeTag = null
+}) {
+  const visibleCount = visibleClusters.length;
+  const heldOutCount = heldOutField?.held_out_count || 0;
+  const basisClusters = visibleClusters.length ? visibleClusters : scoredClusters;
+  const dominantCategory = dominantMomentDomain(basisClusters);
+  const domainLabel = momentDomainLabel(dominantCategory);
+  const diplomacyShare = categoryShare(visibleClusters, "diplomacy");
+  const securityShare = categoryShare(visibleClusters, "security");
+  const visibleCategoryCount = new Set(visibleClusters.map((cluster) => cluster.category).filter(Boolean)).size;
+  const primarySuppressionReason = heldOutField?.top_suppression_reasons?.[0]?.reason_code || null;
+  const humanSuppressionReason = humanizeMomentReason(primarySuppressionReason);
+  const diplomacyCentral =
+    visibleCount >= 2 &&
+    diplomacyShare >= 0.3 &&
+    metrics.coherence >= 0.5 &&
+    visibleSampleState !== "empty" &&
+    visibleSampleState !== "extremely_thin";
+
+  let basis = "sufficient";
+  if (modeTag === "degraded") {
+    basis = "weak";
+  } else if (visibleSampleState === "empty" || (!visibleCount && heldOutCount === 0)) {
+    basis = "insufficient";
+  } else if (
+    visibleSampleState === "extremely_thin" ||
+    visibleSampleState === "thin" ||
+    visibleCount < 2 ||
+    metrics.coherence < 0.45
+  ) {
+    basis = "weak";
+  }
+
+  let state = "contained";
+  if (modeTag === "degraded") {
+    state = "degraded";
+  } else if (basis === "insufficient") {
+    state = "insufficient_basis";
+  } else if (diplomacyCentral) {
+    state = "negotiation_geometry";
+  } else if (visibleSampleState === "extremely_thin" || visibleSampleState === "thin") {
+    state = "thin";
+  } else if (
+    visibleCategoryCount >= 2 &&
+    metrics.escalationPressure >= 20 &&
+    metrics.coherence >= 0.55 &&
+    metrics.uncertainty <= 0.6
+  ) {
+    state = "mixed_watch";
+  }
+
+  const loadBearingFactors = [];
+  if (diplomacyCentral) {
+    loadBearingFactors.push("diplomacy is materially present in the visible field");
+  }
+  if (securityShare >= 0.25 && diplomacyCentral) {
+    loadBearingFactors.push("security pressure remains active enough to keep the bargaining field brittle");
+  } else if (dominantCategory) {
+    loadBearingFactors.push(`${categoryLabels[dominantCategory] || dominantCategory} is carrying the visible center of gravity`);
+  }
+  if (visibleCount > 0) {
+    loadBearingFactors.push(`${visibleCount} visible cluster${visibleCount === 1 ? "" : "s"} earned appearance`);
+  }
+  if (metrics.coherence >= 0.6) {
+    loadBearingFactors.push("cross-source coherence is strong enough to support compression");
+  } else if (metrics.coherence >= 0.5) {
+    loadBearingFactors.push("coherence is good enough to support a guarded compression");
+  }
+  if (metrics.escalationPressure >= 25) {
+    loadBearingFactors.push("watch-level escalation pressure remains active");
+  }
+  if (toneMetrics && toneMetrics.tone_state !== "insufficient_basis" && toneMetrics.top_tone_display) {
+    loadBearingFactors.push(`tone posture leans ${toneMetrics.top_tone_display} without overruling the field`);
+  }
+
+  const constraintFactors = [];
+  if (visibleSampleState === "extremely_thin" || visibleSampleState === "thin") {
+    constraintFactors.push("the visible sample remains thin");
+  } else if (visibleSampleState === "limited") {
+    constraintFactors.push("visible authority remains limited");
+  }
+  if (heldOutCount > 0) {
+    constraintFactors.push(`top refusal reason is ${humanSuppressionReason}`);
+  }
+  if (metrics.uncertainty >= 0.65) {
+    constraintFactors.push("uncertainty remains elevated");
+  }
+  if (metrics.coherence < 0.5) {
+    constraintFactors.push("coherence is not strong enough to fully settle the read");
+  }
+  if (surfaceRecoveryMode === "provisional") {
+    constraintFactors.push("surface recovery is still operating in provisional mode");
+  }
+  if (!diplomacyCentral && visibleCategoryCount <= 1 && visibleCount > 0) {
+    constraintFactors.push("single-domain dominance narrows the structural read");
+  }
+
+  let heldOutPressure = "Little refused pressure is visible beneath the current surface.";
+  if (heldOutCount > 0 && visibleCount === 0) {
+    heldOutPressure = `${heldOutCount} clusters were seen underneath the surface, but none earned visible appearance.`;
+  } else if (heldOutCount > 0 && heldOutCount >= Math.max(3, visibleCount * 2)) {
+    heldOutPressure = `${heldOutCount} held-out clusters sit beneath ${visibleCount} visible cluster${visibleCount === 1 ? "" : "s"}, so unseen pressure still outweighs the surfaced field.`;
+  } else if (heldOutCount > 0) {
+    heldOutPressure = `${heldOutCount} clusters remain held out beneath the visible field; refusal pressure is present but not dominant.`;
+  }
+
+  let currentStructuralState = "contained pressure with bounded movement and no clear structural break.";
+  let openEdge = "The field has shape, but some visible texture may still be provisional or held below appearance.";
+
+  if (state === "degraded") {
+    currentStructuralState = "fallback continuity surface; structurally useful, not full live authority.";
+    openEdge = "More may be present than the current surface can safely compress.";
+  } else if (state === "insufficient_basis") {
+    currentStructuralState = "insufficient structural basis; the window does not support compression beyond thin-state notes.";
+    openEdge = "Wait for a denser window before assigning stronger structure.";
+  } else if (state === "thin") {
+    currentStructuralState = "observationally thin and directionally unresolved.";
+    openEdge = "The field may be moving, but this window does not yet justify a broader structural claim.";
+  } else if (state === "negotiation_geometry") {
+    currentStructuralState = "mixed watch-state with a real diplomatic brake; bargaining structure is visible but not settled.";
+    openEdge = "The overlap corridor is visible, but hard collision points remain unresolved under present bargaining pressure.";
+  } else if (state === "mixed_watch") {
+    currentStructuralState = "balanced but brittle; pressure is active, but constraints are still materially present.";
+    openEdge = "The field is elevated and fairly coherent, but it is not yet structurally settled.";
+  }
+
+  return {
+    title: "Structural Read",
+    subtitle: "Analytical map of the present window, not a forecast.",
+    state,
+    state_label: state.replace(/_/g, " "),
+    basis,
+    basis_label: basis.replace(/_/g, " "),
+    lines: {
+      active_domain:
+        state === "negotiation_geometry"
+          ? "Bargaining pressure with diplomacy materially present in the visible field."
+          : visibleCount === 0
+            ? "Sparse visible field with pressure held below appearance."
+            : `Current field center: ${domainLabel}.`,
+      load_bearing_factors: joinStructuralFactors(
+        loadBearingFactors,
+        "No strong load-bearing factors surfaced beyond the base field state."
+      ),
+      constraint_factors: joinStructuralFactors(
+        constraintFactors,
+        "No dominant structural constraint overtook the current surface."
+      ),
+      held_out_pressure: heldOutPressure,
+      current_structural_state: currentStructuralState,
+      open_edge: openEdge
+    }
+  };
+}
+
 function sortHeldOutClusters(clusters = []) {
   return [...clusters].sort((left, right) => {
     const strengthDiff = (right.signal_strength || 0) - (left.signal_strength || 0);
@@ -1150,7 +1331,7 @@ function buildHeldOutField(scoredClusters = [], visibleClusters = []) {
   };
 }
 
-function buildSourceDiversityDrivers(clusters = [], limit = 25) {
+function buildSourceDiversityDrivers(clusters = [], limit = Number.POSITIVE_INFINITY) {
   const feedMap = new Map();
 
   for (const cluster of clusters) {
@@ -1173,7 +1354,7 @@ function buildSourceDiversityDrivers(clusters = [], limit = 25) {
     }
   }
 
-  return [...feedMap.values()]
+  const sortedFeeds = [...feedMap.values()]
     .sort((left, right) => {
       const clusterDiff = right.cluster_count - left.cluster_count;
       if (clusterDiff !== 0) {
@@ -1181,8 +1362,9 @@ function buildSourceDiversityDrivers(clusters = [], limit = 25) {
       }
 
       return left.feed.localeCompare(right.feed);
-    })
-    .slice(0, limit);
+    });
+
+  return Number.isFinite(limit) ? sortedFeeds.slice(0, limit) : sortedFeeds;
 }
 
 function buildEventItems(clusters, options = {}) {
@@ -1399,7 +1581,7 @@ function buildExplain(metrics, clusters, escalation, toneMetrics) {
     .sort((left, right) => (right._confidence || 0) - (left._confidence || 0))
     .slice(0, 5)
     .map(({ _confidence, ...driver }) => driver);
-  const sourceDiversityDrivers = buildSourceDiversityDrivers(clusters, 25);
+  const sourceDiversityDrivers = buildSourceDiversityDrivers(clusters);
   const toneDrivers = buildToneDrivers(clusters, 5);
   const escalationDrivers = escalation.contributingClusters.slice(0, 5).map((cluster) => ({
     cluster_id: cluster.cluster_id,
@@ -1462,7 +1644,7 @@ function buildExplain(metrics, clusters, escalation, toneMetrics) {
       ],
       drivers: sourceDiversityDrivers,
       caveats: [
-        "Showing up to 25 distinct feeds observed in qualified clusters.",
+        "Showing all distinct feeds observed in qualified clusters.",
         "More feeds improve breadth but do not guarantee correctness."
       ]
     },
@@ -1667,6 +1849,16 @@ export function scoreDashboardBundle({
     temporalState,
     modeTag
   });
+  const structuralRead = buildStructuralRead({
+    scoredClusters,
+    visibleClusters,
+    heldOutField,
+    visibleSampleState,
+    surfaceRecoveryMode: surfaceSelection.surfaceRecoveryMode,
+    metrics,
+    toneMetrics,
+    modeTag
+  });
 
   const dashboard = {
     meta: {
@@ -1717,6 +1909,7 @@ export function scoreDashboardBundle({
     held_out_field: heldOutField,
     tone_metrics: toneMetrics,
     tree_of_relief: treeOfRelief,
+    structural_read: structuralRead,
     notes: {
       title: "Volatility Notes",
       items: buildNotes(metrics, scoredClusters, {
@@ -1749,6 +1942,8 @@ export function scoreDashboardBundle({
       surface_recovery_mode: surfaceSelection.surfaceRecoveryMode,
       provisional_visible_count: surfaceSelection.provisionalVisibleCount,
       moment_resolve_state: treeOfRelief.state,
+      structural_read_state: structuralRead.state,
+      structural_basis: structuralRead.basis,
       tone_state: toneMetrics.tone_state,
       tone_basis_cluster_count: toneMetrics.basis_cluster_count,
       escalation_pressure: escalation.value,
