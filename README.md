@@ -30,6 +30,7 @@ External feeds never touch the board directly. They pass through connectors, nor
 - basket-driven GDELT-first ingest path with optional ACLED support
 - optional curated RSS watch-feed ingest lane, disabled by default until configured
 - Event Registry reserved as a later shadow-discovery lane and not yet implemented
+- draft MT-07 result-envelope sidecar export for helper/handoff use
 - SQLite-backed persistence
 - incident-aware normalization with source-family logic, translation-aware comparison text, and event-geometry separation
 - weighted clustering with cross-category incident merging where incident identity is strong
@@ -42,6 +43,7 @@ External feeds never touch the board directly. They pass through connectors, nor
 The current front end is matched to:
 
 - `/api/dashboard?window=6h`
+- `/api/handoff/mt07-envelope`
 - `/api/metrics/history?window=6h&compare=24h,7d`
 - `/api/composition?window=6h`
 - `/api/events?...`
@@ -55,6 +57,8 @@ The project-scoped read-only MCP server in [`.mcp.json`](C:/Users/Neltron/Docume
 
 - `get_dashboard`
   - reads the current dashboard bundle from the local Signal app API
+- `get_mt07_envelope`
+  - reads the draft MT-07 result-envelope sidecar from the local Signal app API
 - `get_explain_metric`
   - reads one explain surface such as `signal_velocity`, `volatility_index`, `escalation_pressure`, `correction_rate`, or `tone_pressure`
 - `get_health_report`
