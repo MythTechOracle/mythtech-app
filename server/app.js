@@ -13,6 +13,7 @@ import historyRouter from "./routes/metricsHistory.js";
 import compositionRouter from "./routes/composition.js";
 import eventsRouter from "./routes/events.js";
 import explainRouter from "./routes/explainMetric.js";
+import mt07EnvelopeRouter from "./routes/mt07Envelope.js";
 import { initDb } from "./db/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,6 +34,7 @@ export function createServer() {
   app.use("/api/health/lane-compare", laneCompareRouter);
   app.use("/api/health", healthRouter);
   app.use("/api/dashboard", dashboardRouter);
+  app.use("/api/handoff/mt07-envelope", mt07EnvelopeRouter);
   app.use("/api/metrics/history", historyRouter);
   app.use("/api/composition", compositionRouter);
   app.use("/api/events", eventsRouter);

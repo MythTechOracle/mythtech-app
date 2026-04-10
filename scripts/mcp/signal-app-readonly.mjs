@@ -11,6 +11,7 @@ const SNAPSHOT_LIVE_MAX_AGE_MS = 15 * 60 * 1000;
 
 const TOOL_NAMES = {
   dashboard: "get_dashboard",
+  mt07Envelope: "get_mt07_envelope",
   explainMetric: "get_explain_metric",
   healthReport: "get_health_report",
   snapshotSelection: "get_snapshot_selection",
@@ -247,6 +248,11 @@ export async function handleToolCall(name, rawArgs, env = process.env) {
         await fetchJson("/api/dashboard", { window: args.window || "6h" }, env)
       );
 
+    case TOOL_NAMES.mt07Envelope:
+      return makeTextResult(
+        await fetchJson("/api/handoff/mt07-envelope", {}, env)
+      );
+
     case TOOL_NAMES.explainMetric:
       if (!args.key) {
         throw new Error("get_explain_metric requires a metric key.");
@@ -312,6 +318,15 @@ export function createSignalReadonlyServer(env = process.env) {
               description: "Window label such as 6h, 24h, or 72h."
             }
           }
+        }
+      },
+      {
+        name: TOOL_NAMES.mt07Envelope,
+        description: "Read the draft MT-07 result-envelope sidecar from the local Signal app API.",
+        inputSchema: {
+          type: "object",
+          additionalProperties: false,
+          properties: {}
         }
       },
       {
