@@ -1,0 +1,44 @@
+import dotenv from "dotenv";
+import { initDb, insertRawItems } from "../db/db.js";
+import { buildRssRuntimeConfig, fetchRssWindow } from "../connectors/rssConnector.js";
+
+dotenv.config();
+initDb();
+
+export async function ingestRss() {
+  const config = buildRssRuntimeConfig(process.env);
+
+  if (!config.enabled) {
+    console.log("[rss] disabled");
+    return { fetched: 0, inserted: 0, skipped: true, reason: "disabled", feed_results: [], errors: [] };
+  }
+
+  const result = await fetchRssWindow(config);
+  const inserted = insertRawItems(result.items);
+
+  console.log(JSON.stringify({
+    task: "ingestRss",
+    observed_at: result.observed_at,
+    fetched: result.items.length,
+    inserted,
+    feed_count: config.feeds.length,
+    feed_results: result.feed_results,
+    errors: result.errors
+  }, null, 2));
+
+  return {
+    fetched: result.items.length,
+    inserted,
+    skipped: result.skipped,
+    reason: result.reason,
+    feed_results: result.feed_results,
+    errors: result.errors
+  };
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  ingestRss().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
