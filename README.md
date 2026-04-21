@@ -31,6 +31,7 @@ External feeds never touch the board directly. They pass through connectors, nor
 - optional curated RSS watch-feed ingest lane, disabled by default until configured
 - Event Registry reserved as a later shadow-discovery lane and not yet implemented
 - draft MT-07 result-envelope sidecar export for helper/handoff use
+- optional embedded Claude helper audit lane, advisory-only and disabled until Anthropic credentials are configured
 - SQLite-backed persistence
 - incident-aware normalization with source-family logic, translation-aware comparison text, and event-geometry separation
 - weighted clustering with cross-category incident merging where incident identity is strong
@@ -44,6 +45,7 @@ The current front end is matched to:
 
 - `/api/dashboard?window=6h`
 - `/api/handoff/mt07-envelope`
+- `/api/helper/audit`
 - `/api/metrics/history?window=6h&compare=24h,7d`
 - `/api/composition?window=6h`
 - `/api/events?...`
@@ -99,9 +101,10 @@ It may not:
 - modify operator-facing field truth
 - autonomously change app code or runtime state
 
-### Claude Agent SDK (planned narrow Phase 1)
+### Claude Agent SDK (narrow Phase 1 helper lane)
 
-If enabled later, the Agent SDK layer will be a TypeScript-first helper service with read-only inputs and advisory-only outputs.
+The repo now includes a first embedded helper lane at `/api/helper/audit`.
+It remains read-only, advisory-only, and unavailable unless `CLAUDE_HELPER_ENABLED=true` and `ANTHROPIC_API_KEY` are set.
 
 Phase 1 outputs are limited to:
 

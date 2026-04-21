@@ -14,6 +14,8 @@ import compositionRouter from "./routes/composition.js";
 import eventsRouter from "./routes/events.js";
 import explainRouter from "./routes/explainMetric.js";
 import mt07EnvelopeRouter from "./routes/mt07Envelope.js";
+import mt07KernelSessionRouter from "./routes/mt07KernelSession.js";
+import helperAuditRouter from "./routes/helper/audit.js";
 import { initDb } from "./db/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,6 +37,8 @@ export function createServer() {
   app.use("/api/health", healthRouter);
   app.use("/api/dashboard", dashboardRouter);
   app.use("/api/handoff/mt07-envelope", mt07EnvelopeRouter);
+  app.use("/api/handoff/mt07-kernel-session", mt07KernelSessionRouter);
+  app.use("/api/helper/audit", helperAuditRouter);
   app.use("/api/metrics/history", historyRouter);
   app.use("/api/composition", compositionRouter);
   app.use("/api/events", eventsRouter);

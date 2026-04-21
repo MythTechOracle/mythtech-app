@@ -13,6 +13,7 @@
     "start:live": "node ./server/index.js"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.98",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "better-sqlite3": "^12.8.0",
     "cors": "^2.8.5",

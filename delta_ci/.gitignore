@@ -1,0 +1,8 @@
+# Generated candidate packets and verifier reports
+session/*.json
+verify_out/*.json
+verify_out/*.csv
+
+# Keep directory placeholders tracked
+!session/.gitkeep
+!verify_out/.gitkeep
