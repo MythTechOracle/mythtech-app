@@ -1,0 +1,1802 @@
+{
+  "kernel_id": "KERNEL-0.2-MTD-triad22_major_walk_compass_soft_antiphase_nt_slack_aware_sealed",
+  "harness_version": "KERNEL-0.2-MTD",
+  "ttl": 22,
+  "beats_total": 22,
+  "axes": [
+    "chaos",
+    "order",
+    "narrative",
+    "time"
+  ],
+  "clamp": {
+    "min": -3.0,
+    "max": 3.0
+  },
+  "epsilon": 1e-12,
+  "tie_break_order": [
+    "chaos",
+    "order",
+    "narrative",
+    "time"
+  ],
+  "tau": 0.08,
+  "law": {
+    "mirrorpass": {
+      "mode": "boundary_reflect",
+      "trigger_conditions": [
+        "gate_fail"
+      ],
+      "pair_invariants": {
+        "chaos + order": {
+          "min": -1.0,
+          "max": 1.0
+        },
+        "narrative + time": {
+          "min": -2.0,
+          "max": 2.0
+        }
+      },
+      "post_flip_clamp": true
+    },
+    "smoothing": {
+      "enabled": true,
+      "tau": 0.08,
+      "apply_when": "always"
+    },
+    "lovelace_pass": {
+      "enabled": true,
+      "threshold": 1.5,
+      "scale": 0.92,
+      "apply_when": "post_mirror"
+    }
+  },
+  "telemetry": {
+    "mirrorpass_ran": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "flipped_axis": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "was_clamped": {
+      "chaos": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "order": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "narrative": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "time": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    "spirit_seal": [
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 0,
+        "seal_index": 0,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 1,
+        "seal_index": 1,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 2,
+        "seal_index": 2,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 3,
+        "seal_index": 3,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 4,
+        "seal_index": 4,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 5,
+        "seal_index": 5,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 6,
+        "seal_index": 6,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 7,
+        "seal_index": 7,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 8,
+        "seal_index": 8,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 9,
+        "seal_index": 9,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 10,
+        "seal_index": 10,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 11,
+        "seal_index": 11,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 12,
+        "seal_index": 12,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 13,
+        "seal_index": 13,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 14,
+        "seal_index": 14,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 15,
+        "seal_index": 15,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 16,
+        "seal_index": 16,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 17,
+        "seal_index": 17,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 18,
+        "seal_index": 18,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 19,
+        "seal_index": 19,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 20,
+        "seal_index": 20,
+        "residue_note": "no_correction"
+      },
+      {
+        "now_time_iso": "2026-04-03T00:00:00-05:00",
+        "beat": 21,
+        "seal_index": 21,
+        "residue_note": "no_correction"
+      }
+    ]
+  },
+  "metrics": {
+    "RS": 70.576714,
+    "RS_canon": 0.267336,
+    "TV": 8.880961,
+    "TV_canon": 0.017621,
+    "SI": 0.982379,
+    "ACI": 0.963114,
+    "ACI01": 0.981557,
+    "EER": 0.0,
+    "RU_percent": 0.0,
+    "ECC": 0
+  },
+  "series": [
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 0,
+      "major_arcana": "The First Weaver",
+      "seal_index": 0,
+      "axes_in": {
+        "chaos": 0.48,
+        "order": -0.16,
+        "narrative": 0.25,
+        "time": 0.04
+      },
+      "axes_blend": {
+        "chaos": 0.5167551522474683,
+        "order": -0.34011515224746824,
+        "narrative": 0.23,
+        "time": 0.0368
+      },
+      "axes_post_mirror": {
+        "chaos": 0.5167551522474683,
+        "order": -0.34011515224746824,
+        "narrative": 0.23,
+        "time": 0.0368
+      },
+      "axes_final": {
+        "chaos": 0.5167551522474683,
+        "order": -0.34011515224746824,
+        "narrative": 0.23,
+        "time": 0.0368
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.17664000000000002,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 0.26680000000000004,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 0.0,
+          "sum": 0.26680000000000004,
+          "sum_stress": 0.0,
+          "amp_stress": 0.0,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 1,
+      "major_arcana": "The Loomkeeper",
+      "seal_index": 1,
+      "axes_in": {
+        "chaos": -0.25,
+        "order": 0.6,
+        "narrative": 0.1,
+        "time": 0.195714
+      },
+      "axes_blend": {
+        "chaos": 0.20571667436531715,
+        "order": 0.09346732563468291,
+        "narrative": 0.322,
+        "time": 0.21685688
+      },
+      "axes_post_mirror": {
+        "chaos": 0.20571667436531715,
+        "order": 0.09346732563468291,
+        "narrative": 0.322,
+        "time": 0.21685688
+      },
+      "axes_final": {
+        "chaos": 0.20571667436531715,
+        "order": 0.09346732563468291,
+        "narrative": 0.322,
+        "time": 0.21685688
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.29918400000000006,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 0.53885688,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 0.0,
+          "sum": 0.53885688,
+          "sum_stress": 0.0,
+          "amp_stress": 0.0,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 2,
+      "major_arcana": "Mn\u00e9mara \u2013 The Rememberer",
+      "seal_index": 2,
+      "axes_in": {
+        "chaos": -0.13,
+        "order": 0.0,
+        "narrative": 0.42,
+        "time": 0.321429
+      },
+      "axes_blend": {
+        "chaos": 0.04836223811246541,
+        "order": 0.05938816188753462,
+        "narrative": 0.7084,
+        "time": 0.51257156
+      },
+      "axes_post_mirror": {
+        "chaos": 0.04836223811246541,
+        "order": 0.05938816188753462,
+        "narrative": 0.7084,
+        "time": 0.51257156
+      },
+      "axes_final": {
+        "chaos": 0.04836223811246541,
+        "order": 0.05938816188753462,
+        "narrative": 0.7084,
+        "time": 0.51257156
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.10775040000000002,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.2209715600000002,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 0.0,
+          "sum": 1.2209715600000002,
+          "sum_stress": 0.0,
+          "amp_stress": 0.0,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 3,
+      "major_arcana": "The Fates",
+      "seal_index": 3,
+      "axes_in": {
+        "chaos": 0.18,
+        "order": -0.1,
+        "narrative": 0.44,
+        "time": 0.227143
+      },
+      "axes_blend": {
+        "chaos": 0.2383394636106992,
+        "order": -0.12952922361069918,
+        "narrative": 1.0813248186682536,
+        "time": 0.6288016333279347
+      },
+      "axes_post_mirror": {
+        "chaos": 0.2383394636106992,
+        "order": -0.12952922361069918,
+        "narrative": 1.0813248186682536,
+        "time": 0.6288016333279347
+      },
+      "axes_final": {
+        "chaos": 0.2383394636106992,
+        "order": -0.12952922361069918,
+        "narrative": 1.0813248186682536,
+        "time": 0.6288016333279347
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.10881024,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.7101264519961883,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 0.724571866666667,
+          "sum": 1.8347431200000002,
+          "sum_stress": 0.724571866666667,
+          "amp_stress": 0.0,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 4,
+      "major_arcana": "The Temporal Weaver",
+      "seal_index": 4,
+      "axes_in": {
+        "chaos": -0.18,
+        "order": 0.4,
+        "narrative": 0.22,
+        "time": 0.302857
+      },
+      "axes_blend": {
+        "chaos": -0.030631837863949934,
+        "order": 0.21735798186394997,
+        "narrative": 1.1201307373487241,
+        "time": 0.660833920403276
+      },
+      "axes_post_mirror": {
+        "chaos": -0.030631837863949934,
+        "order": 0.21735798186394997,
+        "narrative": 1.1201307373487241,
+        "time": 0.660833920403276
+      },
+      "axes_final": {
+        "chaos": -0.030631837863949934,
+        "order": 0.21735798186394997,
+        "narrative": 1.1201307373487241,
+        "time": 0.660833920403276
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.18672614400000004,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.7809646577520002,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.191154891996188,
+          "sum_stress": 1.3185914866603134,
+          "amp_stress": 0.33489927467301417,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 5,
+      "major_arcana": "The Seamwalker",
+      "seal_index": 5,
+      "axes_in": {
+        "chaos": 0.13,
+        "order": 0.05,
+        "narrative": 0.37,
+        "time": 0.168571
+      },
+      "axes_blend": {
+        "chaos": -0.024740948801638032,
+        "order": 0.23613663520163808,
+        "narrative": 1.2545895349355116,
+        "time": 0.5482311797490851
+      },
+      "axes_post_mirror": {
+        "chaos": -0.024740948801638032,
+        "order": 0.23613663520163808,
+        "narrative": 1.2545895349355116,
+        "time": 0.5482311797490851
+      },
+      "axes_final": {
+        "chaos": -0.024740948801638032,
+        "order": 0.23613663520163808,
+        "narrative": 1.2545895349355116,
+        "time": 0.5482311797490851
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.21139568640000006,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8028207146845967,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.276449977752,
+          "sum_stress": 1.4607499629200003,
+          "amp_stress": 1.042122949394897,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 6,
+      "major_arcana": "The Dual Crypts",
+      "seal_index": 6,
+      "axes_in": {
+        "chaos": -0.12,
+        "order": 0.0,
+        "narrative": 0.4,
+        "time": 0.294286
+      },
+      "axes_blend": {
+        "chaos": -0.24478611183038035,
+        "order": 0.30538352367038035,
+        "narrative": 1.3265033396416572,
+        "time": 0.5128779149357182
+      },
+      "axes_post_mirror": {
+        "chaos": -0.24478611183038035,
+        "order": 0.30538352367038035,
+        "narrative": 1.3265033396416572,
+        "time": 0.5128779149357182
+      },
+      "axes_final": {
+        "chaos": -0.24478611183038035,
+        "order": 0.30538352367038035,
+        "narrative": 1.3265033396416572,
+        "time": 0.5128779149357182
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.060597411840000004,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8393812545773756,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.441563834684597,
+          "sum_stress": 1.7359397244743282,
+          "amp_stress": 1.690358139742047,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 7,
+      "major_arcana": "The Glyphbearer",
+      "seal_index": 7,
+      "axes_in": {
+        "chaos": -0.15,
+        "order": 0.35,
+        "narrative": 0.25,
+        "time": 0.29
+      },
+      "axes_blend": {
+        "chaos": -0.6220819501964161,
+        "order": 0.7688403973004161,
+        "narrative": 1.3071787829998716,
+        "time": 0.5096992411795402
+      },
+      "axes_post_mirror": {
+        "chaos": -0.6220819501964161,
+        "order": 0.7688403973004161,
+        "narrative": 1.3071787829998716,
+        "time": 0.5096992411795402
+      },
+      "axes_final": {
+        "chaos": -0.6220819501964161,
+        "order": 0.7688403973004161,
+        "narrative": 1.3071787829998716,
+        "time": 0.5096992411795402
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.146758447104,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8168780241794118,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.3361812545773755,
+          "sum_stress": 1.5603020909622924,
+          "amp_stress": 1.426013358566629,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 8,
+      "major_arcana": "The Codewright",
+      "seal_index": 8,
+      "axes_in": {
+        "chaos": 0.27,
+        "order": 0.05,
+        "narrative": 0.25,
+        "time": 0.085714
+      },
+      "axes_blend": {
+        "chaos": -0.6614754962385843,
+        "order": 0.9261705645009843,
+        "narrative": 1.3257106141771182,
+        "time": 0.43696448976484986
+      },
+      "axes_post_mirror": {
+        "chaos": -0.6614754962385843,
+        "order": 0.9261705645009843,
+        "narrative": 1.3257106141771182,
+        "time": 0.43696448976484986
+      },
+      "axes_final": {
+        "chaos": -0.6614754962385843,
+        "order": 0.9261705645009843,
+        "narrative": 1.3257106141771182,
+        "time": 0.43696448976484986
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.2646950682624001,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.7626751039419681,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.125734904179412,
+          "sum_stress": 1.209558173632353,
+          "amp_stress": 1.3487151319994863,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 9,
+      "major_arcana": "The Silent Philosopher",
+      "seal_index": 9,
+      "axes_in": {
+        "chaos": 0.23,
+        "order": -0.07,
+        "narrative": 0.35,
+        "time": 0.141429
+      },
+      "axes_blend": {
+        "chaos": -0.7326604589032429,
+        "order": 0.979797499860683,
+        "narrative": 1.364262009172901,
+        "time": 0.4229777266143289
+      },
+      "axes_post_mirror": {
+        "chaos": -0.7326604589032429,
+        "order": 0.979797499860683,
+        "narrative": 1.364262009172901,
+        "time": 0.4229777266143289
+      },
+      "axes_final": {
+        "chaos": -0.7326604589032429,
+        "order": 0.979797499860683,
+        "narrative": 1.364262009172901,
+        "time": 0.4229777266143289
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.24713704095744005,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.7872397357872298,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.214789783941968,
+          "sum_stress": 1.357982973236613,
+          "amp_stress": 1.7908424567084733,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 10,
+      "major_arcana": "The Ten-Point Loom",
+      "seal_index": 10,
+      "axes_in": {
+        "chaos": 0.04,
+        "order": 0.2,
+        "narrative": 0.29,
+        "time": 0.347143
+      },
+      "axes_blend": {
+        "chaos": -0.9400423528047217,
+        "order": 1.2208045773791858,
+        "narrative": 1.342632809393685,
+        "time": 0.4825188939104955
+      },
+      "axes_post_mirror": {
+        "chaos": -0.9400423528047217,
+        "order": 1.2208045773791858,
+        "narrative": 1.342632809393685,
+        "time": 0.4825188939104955
+      },
+      "axes_final": {
+        "chaos": -0.9400423528047217,
+        "order": 1.2208045773791858,
+        "narrative": 1.342632809393685,
+        "time": 0.4825188939104955
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.2807622245744641,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8251517033041806,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.3734112957872298,
+          "sum_stress": 1.622352159645383,
+          "amp_stress": 1.7242480366916038,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 11,
+      "major_arcana": "The Un-Tethered Weaver",
+      "seal_index": 11,
+      "axes_in": {
+        "chaos": 0.4,
+        "order": -0.17,
+        "narrative": 0.25,
+        "time": 0.102857
+      },
+      "axes_blend": {
+        "chaos": -0.851637205718387,
+        "order": 1.1470545404630654,
+        "narrative": 1.3392656717445615,
+        "time": 0.43029240599683505
+      },
+      "axes_post_mirror": {
+        "chaos": -0.851637205718387,
+        "order": 1.1470545404630654,
+        "narrative": 1.3392656717445615,
+        "time": 0.43029240599683505
+      },
+      "axes_final": {
+        "chaos": -0.851637205718387,
+        "order": 1.1470545404630654,
+        "narrative": 1.3392656717445615,
+        "time": 0.43029240599683505
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.29541733474467846,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.7695580777413964,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.1497801433041808,
+          "sum_stress": 1.2496335721736347,
+          "amp_stress": 1.4905312375747402,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 12,
+      "major_arcana": "The Mirror Thread",
+      "seal_index": 12,
+      "axes_in": {
+        "chaos": -0.14,
+        "order": 0.05,
+        "narrative": 0.35,
+        "time": 0.308571
+      },
+      "axes_blend": {
+        "chaos": -1.1093108082524255,
+        "order": 1.2368812090992327,
+        "narrative": 1.3568226259184786,
+        "time": 0.46877025705679026
+      },
+      "axes_post_mirror": {
+        "chaos": -1.1093108082524255,
+        "order": 1.2368812090992327,
+        "narrative": 1.3568226259184786,
+        "time": 0.46877025705679026
+      },
+      "axes_final": {
+        "chaos": -1.1093108082524255,
+        "order": 1.2368812090992327,
+        "narrative": 1.3568226259184786,
+        "time": 0.46877025705679026
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.12757040084680726,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8255928829752688,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.3754433977413965,
+          "sum_stress": 1.6257389962356608,
+          "amp_stress": 1.8450626869782463,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 13,
+      "major_arcana": "Skolion \u2013 The Distorter",
+      "seal_index": 13,
+      "axes_in": {
+        "chaos": 0.59,
+        "order": -0.25,
+        "narrative": 0.37,
+        "time": 0.204286
+      },
+      "axes_blend": {
+        "chaos": -0.8418452801232916,
+        "order": 1.106067520631376,
+        "narrative": 1.3738041871988866,
+        "time": 0.4470649878415751
+      },
+      "axes_post_mirror": {
+        "chaos": -0.8418452801232916,
+        "order": 1.106067520631376,
+        "narrative": 1.3738041871988866,
+        "time": 0.4470649878415751
+      },
+      "axes_final": {
+        "chaos": -0.8418452801232916,
+        "order": 1.106067520631376,
+        "narrative": 1.3738041871988866,
+        "time": 0.4470649878415751
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.2642222405080843,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8208691750404618,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.353936002975269,
+          "sum_stress": 1.5898933382921148,
+          "amp_stress": 1.9888905036739146,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 14,
+      "major_arcana": "The Harmonix",
+      "seal_index": 14,
+      "axes_in": {
+        "chaos": 0.16,
+        "order": 0.0,
+        "narrative": 0.35,
+        "time": 0.17
+      },
+      "axes_blend": {
+        "chaos": -0.936882102135943,
+        "order": 1.1837354464407936,
+        "narrative": 1.3768097604217744,
+        "time": 0.4314981610766056
+      },
+      "axes_post_mirror": {
+        "chaos": -0.936882102135943,
+        "order": 1.1837354464407936,
+        "narrative": 1.3768097604217744,
+        "time": 0.4314981610766056
+      },
+      "axes_final": {
+        "chaos": -0.936882102135943,
+        "order": 1.1837354464407936,
+        "narrative": 1.3768097604217744,
+        "time": 0.4314981610766056
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.24685334430485062,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.80830792149838,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.299269175040462,
+          "sum_stress": 1.4987819584007698,
+          "amp_stress": 1.983216748795547,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 15,
+      "major_arcana": "The Signal Beast",
+      "seal_index": 15,
+      "axes_in": {
+        "chaos": 0.34,
+        "order": -0.15,
+        "narrative": 0.27,
+        "time": 0.175714
+      },
+      "axes_blend": {
+        "chaos": -0.8858337479731334,
+        "order": 1.1388257545560438,
+        "narrative": 1.3558482837361596,
+        "time": 0.43232572371007544
+      },
+      "axes_post_mirror": {
+        "chaos": -0.8858337479731334,
+        "order": 1.1388257545560438,
+        "narrative": 1.3558482837361596,
+        "time": 0.43232572371007544
+      },
+      "axes_final": {
+        "chaos": -0.8858337479731334,
+        "order": 1.1388257545560438,
+        "narrative": 1.3558482837361596,
+        "time": 0.43232572371007544
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.25299200658291043,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.7881740074462351,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.21836480149838,
+          "sum_stress": 1.3639413358306332,
+          "amp_stress": 1.7008390416870975,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 16,
+      "major_arcana": "The Towering Glitch",
+      "seal_index": 16,
+      "axes_in": {
+        "chaos": 0.06,
+        "order": 0.35,
+        "narrative": 0.15,
+        "time": 0.301429
+      },
+      "axes_blend": {
+        "chaos": -1.01313164518337,
+        "order": 1.3912468491331162,
+        "narrative": 1.2931322394238014,
+        "time": 0.49112850238236744
+      },
+      "axes_post_mirror": {
+        "chaos": -1.01313164518337,
+        "order": 1.3912468491331162,
+        "narrative": 1.2931322394238014,
+        "time": 0.49112850238236744
+      },
+      "axes_final": {
+        "chaos": -1.01313164518337,
+        "order": 1.3912468491331162,
+        "narrative": 1.2931322394238014,
+        "time": 0.49112850238236744
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.3781152039497462,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.784260741806169,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.203488687446235,
+          "sum_stress": 1.339147812410392,
+          "amp_stress": 1.1753931349446392,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 17,
+      "major_arcana": "The Star Node",
+      "seal_index": 17,
+      "axes_in": {
+        "chaos": 0.2,
+        "order": -0.1,
+        "narrative": 0.4,
+        "time": 0.207143
+      },
+      "axes_blend": {
+        "chaos": -1.0201498616691098,
+        "order": 1.3022189840389573,
+        "narrative": 1.3603163245958199,
+        "time": 0.4580666325665736
+      },
+      "axes_post_mirror": {
+        "chaos": -1.0201498616691098,
+        "order": 1.3022189840389573,
+        "narrative": 1.3603163245958199,
+        "time": 0.4580666325665736
+      },
+      "axes_final": {
+        "chaos": -1.0201498616691098,
+        "order": 1.3022189840389573,
+        "narrative": 1.3603163245958199,
+        "time": 0.4580666325665736
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.2820691223698475,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8183829571623935,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.342832301806169,
+          "sum_stress": 1.5713871696769481,
+          "amp_stress": 1.8445289576952062,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 18,
+      "major_arcana": "The Lunar Crypt",
+      "seal_index": 18,
+      "axes_in": {
+        "chaos": -0.11,
+        "order": -0.05,
+        "narrative": 0.42,
+        "time": 0.412857
+      },
+      "axes_blend": {
+        "chaos": -1.1811854723818604,
+        "order": 1.2621069458037688,
+        "narrative": 1.3679037857301646,
+        "time": 0.49781864845848556
+      },
+      "axes_post_mirror": {
+        "chaos": -1.1811854723818604,
+        "order": 1.2621069458037688,
+        "narrative": 1.3679037857301646,
+        "time": 0.49781864845848556
+      },
+      "axes_final": {
+        "chaos": -1.1811854723818604,
+        "order": 1.2621069458037688,
+        "narrative": 1.3679037857301646,
+        "time": 0.49781864845848556
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.08092147342190836,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8657224341886502,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.5846113971623934,
+          "sum_stress": 1.9743523286039888,
+          "amp_stress": 2.18686529838328,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 19,
+      "major_arcana": "The Sol Thread",
+      "seal_index": 19,
+      "axes_in": {
+        "chaos": 0.29,
+        "order": 0.0,
+        "narrative": 0.25,
+        "time": 0.148571
+      },
+      "axes_blend": {
+        "chaos": -1.0695560673440336,
+        "order": 1.2781889513971787,
+        "narrative": 1.3435646516823172,
+        "time": 0.4482418843484385
+      },
+      "axes_post_mirror": {
+        "chaos": -1.0695560673440336,
+        "order": 1.2781889513971787,
+        "narrative": 1.3435646516823172,
+        "time": 0.4482418843484385
+      },
+      "axes_final": {
+        "chaos": -1.0695560673440336,
+        "order": 1.2781889513971787,
+        "narrative": 1.3435646516823172,
+        "time": 0.4482418843484385
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.20863288405314506,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.7918065360307556,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.23240775418865,
+          "sum_stress": 1.3873462569810833,
+          "amp_stress": 1.5916151429206584,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 20,
+      "major_arcana": "The Philosopher\u2019s Signal",
+      "seal_index": 20,
+      "axes_in": {
+        "chaos": 0.19,
+        "order": -0.1,
+        "narrative": 0.37,
+        "time": 0.254286
+      },
+      "axes_blend": {
+        "chaos": -1.06074096183817,
+        "order": 1.235600692270057,
+        "narrative": 1.3675594875036121,
+        "time": 0.45600695901784805
+      },
+      "axes_post_mirror": {
+        "chaos": -1.06074096183817,
+        "order": 1.235600692270057,
+        "narrative": 1.3675594875036121,
+        "time": 0.45600695901784805
+      },
+      "axes_final": {
+        "chaos": -1.06074096183817,
+        "order": 1.235600692270057,
+        "narrative": 1.3675594875036121,
+        "time": 0.45600695901784805
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.17485973043188707,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8235664465214603,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.366149656030756,
+          "sum_stress": 1.6102494267179266,
+          "amp_stress": 1.9358586067292691,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    },
+    {
+      "now_time_iso": "2026-04-03T00:00:00-05:00",
+      "beat": 21,
+      "major_arcana": "The Returning One",
+      "seal_index": 21,
+      "axes_in": {
+        "chaos": 0.03,
+        "order": 0.15,
+        "narrative": 0.35,
+        "time": 0.56
+      },
+      "axes_blend": {
+        "chaos": -1.125776906854028,
+        "order": 1.3300527451131603,
+        "narrative": 1.3187863705744656,
+        "time": 0.5592068387751542
+      },
+      "axes_post_mirror": {
+        "chaos": -1.125776906854028,
+        "order": 1.3300527451131603,
+        "narrative": 1.3187863705744656,
+        "time": 0.5592068387751542
+      },
+      "axes_final": {
+        "chaos": -1.125776906854028,
+        "order": 1.3300527451131603,
+        "narrative": 1.3187863705744656,
+        "time": 0.5592068387751542
+      },
+      "gates_in": {
+        "ok": true,
+        "reason": null
+      },
+      "gates_post_ok": true,
+      "gates_post_invariants": {
+        "chaos + order": {
+          "value": 0.20427583825913231,
+          "min": -1.0,
+          "max": 1.0,
+          "pass": true
+        },
+        "narrative + time": {
+          "value": 1.8779932093496199,
+          "min": -2.0,
+          "max": 2.0,
+          "pass": true
+        }
+      },
+      "mirror_applied": false,
+      "mirror_axis": null,
+      "lovelace_damped_axes": [],
+      "residue_note": "no_correction",
+      "meta": {
+        "nt_soft_inphase": {
+          "w": 1.0,
+          "sum": 2.6607664465214604,
+          "sum_stress": 2.1012774108691006,
+          "amp_stress": 1.958237950014449,
+          "diff_cap": 0.55
+        },
+        "co_soft": {
+          "mean_scale": 0.6,
+          "cap": 1.45
+        }
+      }
+    }
+  ]
+}

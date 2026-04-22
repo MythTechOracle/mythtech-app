@@ -18,3 +18,10 @@ yarn-debug.log*
 yarn-error.log*
 
 .claude/settings.local.json
+
+# Generated local verifier outputs and helper logs
+tmp/**/session_replay_verify_report.json
+tmp/**/session_replay_verify_diffs.csv
+tmp/**/candidate_prefix.json
+tmp/helper-server.stderr.log
+tmp/helper-server.stdout.log
