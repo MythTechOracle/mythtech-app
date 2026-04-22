@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
+    "test:helper-readonly": "node --test ./tests/claude-helper-readonly-policy.test.js",
     "db:init": "node ./scripts/init-db.js",
     "ingest:once": "node ./scripts/run-ingest-once.js",
     "ingest:acled:once": "node ./scripts/run-ingest-acled-once.js",
