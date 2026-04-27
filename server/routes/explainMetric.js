@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { getSnapshotBundle, buildSnapshot } from "../services/snapshotService.js";
+import { enrichDriverRowsWithTranslation } from "../services/translationService.js";
 import {
   buildEscalationPressureAudit,
   buildEscalationTemporalRead
@@ -51,6 +52,13 @@ router.get("/:key", async (req, res, next) => {
           hardening_without_infrastructure_dominance_example:
             audit.hardening_without_infrastructure_dominance_example
         }
+      };
+    }
+
+    if (key === "source_diversity" && Array.isArray(explain.drivers) && explain.drivers.length) {
+      explain = {
+        ...explain,
+        drivers: await enrichDriverRowsWithTranslation(explain.drivers, "sample_update"),
       };
     }
 

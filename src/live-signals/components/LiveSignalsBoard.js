@@ -34,6 +34,29 @@ function renderAuditExample(example) {
   `;
 }
 
+function renderExplainDriverCell(driver, column) {
+  const key = column.key;
+  const value = driver?.[key] ?? "-";
+
+  if (key === "sample_update") {
+    const translated = driver?.sample_update_translated || driver?.sample_update || "-";
+    const translationNote = driver?.translation?.applied
+      ? driver.translation.note || "Machine-translated to English"
+      : "";
+    const original = driver?.sample_update_translated
+      ? driver?.sample_update_original || driver?.sample_update || ""
+      : "";
+
+    return `
+      <div>${escapeHtml(translated)}</div>
+      ${translationNote ? `<div class="small muted">${escapeHtml(translationNote)}</div>` : ""}
+      ${original ? `<div class="small muted">Original: ${escapeHtml(original)}</div>` : ""}
+    `;
+  }
+
+  return escapeHtml(value);
+}
+
 function formatTemporalState(value) {
   return String(value || "unknown").replace(/_/g, " ");
 }
@@ -560,7 +583,7 @@ async function openExplain(root, card, explain) {
   (explainData.drivers || []).forEach((driver) => {
     const tableRow = document.createElement("tr");
     tableRow.innerHTML = driverColumns
-      .map((column) => `<td>${escapeHtml(driver[column.key] ?? "-")}</td>`)
+      .map((column) => `<td>${renderExplainDriverCell(driver, column)}</td>`)
       .join("");
     rowsRoot.appendChild(tableRow);
   });

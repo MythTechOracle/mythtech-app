@@ -141,3 +141,27 @@ export async function enrichHeldOutItemsWithTranslation(items = []) {
 
   return translatedItems;
 }
+
+export async function enrichDriverRowsWithTranslation(rows = [], fieldKey = "sample_update") {
+  const translatedRows = [];
+
+  for (const row of rows) {
+    const sourceText = String(row?.[fieldKey] || "").trim();
+    const translation = await translateTextToEnglish(sourceText);
+
+    translatedRows.push({
+      ...row,
+      [`${fieldKey}_original`]: sourceText,
+      [`${fieldKey}_translated`]: translation.translated ? translation.translatedText : null,
+      translation: {
+        applied: translation.translated,
+        source_language: translation.sourceLanguage,
+        source_language_label: translation.sourceLanguageLabel,
+        note: translation.note,
+        provider: translation.provider,
+      },
+    });
+  }
+
+  return translatedRows;
+}
