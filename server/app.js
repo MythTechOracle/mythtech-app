@@ -8,6 +8,8 @@ import clusterQualityRouter from "./routes/clusterQuality.js";
 import escalationPressureRouter from "./routes/escalationPressure.js";
 import acledProofRouter from "./routes/acledProof.js";
 import laneCompareRouter from "./routes/laneCompare.js";
+import basketRecallRouter from "./routes/basketRecall.js";
+import infrastructureBackfillRouter from "./routes/infrastructureBackfill.js";
 import dashboardRouter from "./routes/dashboard.js";
 import historyRouter from "./routes/metricsHistory.js";
 import compositionRouter from "./routes/composition.js";
@@ -34,6 +36,8 @@ export function createServer() {
   app.use("/api/health/escalation-pressure", escalationPressureRouter);
   app.use("/api/health/acled-proof", acledProofRouter);
   app.use("/api/health/lane-compare", laneCompareRouter);
+  app.use("/api/health/basket-recall", basketRecallRouter);
+  app.use("/api/health/infrastructure-backfill", infrastructureBackfillRouter);
   app.use("/api/health", healthRouter);
   app.use("/api/dashboard", dashboardRouter);
   app.use("/api/handoff/mt07-envelope", mt07EnvelopeRouter);

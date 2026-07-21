@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { XMLParser } from "fast-xml-parser";
 import { sourceRegistry } from "../config/sources.js";
+import { normalizeDomain } from "../db/db.js";
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 15000;
 const DEFAULT_MAX_ITEMS_PER_FEED = 15;
@@ -232,6 +233,7 @@ function mapEntryToRawItem(entry, feedConfig, observedAt) {
   const category = inferCategory(feedConfig, entry);
 
   return {
+    domain: normalizeDomain(feedConfig.domain || "signals"),
     source_name: feedConfig.name,
     source_type: "rss",
     query_basket: feedConfig.query_basket || category,
@@ -285,6 +287,7 @@ function parseFeedsJson(rawValue) {
     .map((feed) => ({
       name: String(feed?.name || "").trim(),
       url: String(feed?.url || "").trim(),
+      domain: normalizeDomain(feed?.domain || "signals"),
       category: feed?.category || feed?.query_basket || null,
       query_basket: feed?.query_basket || null,
       region: feed?.region || null,
@@ -387,6 +390,7 @@ export async function fetchRssWindow(config = buildRssRuntimeConfig(process.env)
       feedResults.push({
         name: feedConfig.name,
         url: feedConfig.url,
+        domain: feedConfig.domain,
         fetched: entries.length,
         inserted_candidates: mappedItems.length,
         category: feedConfig.category || null
@@ -400,6 +404,7 @@ export async function fetchRssWindow(config = buildRssRuntimeConfig(process.env)
       feedResults.push({
         name: feedConfig.name,
         url: feedConfig.url,
+        domain: feedConfig.domain,
         fetched: 0,
         inserted_candidates: 0,
         category: feedConfig.category || null,

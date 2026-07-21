@@ -843,6 +843,61 @@ function buildExplainMap() {
   };
 }
 
+function buildFixtureSignalCycle({
+  rawItemCount,
+  clusterCount,
+  admittedCount,
+  heldOutCount,
+  correctionCount,
+  signalVelocity,
+  treeState
+}) {
+  return {
+    title: "Signal Cycle",
+    subtitle: "Evidence path for the active window",
+    authority: "audit_display_only",
+    summary: `${rawItemCount} incoming items -> ${clusterCount} clusters -> ${admittedCount} admitted -> ${heldOutCount} held out -> ${correctionCount} corrections`,
+    steps: [
+      {
+        key: "incoming_sources",
+        label: "Incoming sources",
+        value: rawItemCount,
+        note: "Raw intake observed"
+      },
+      {
+        key: "cluster_compare",
+        label: "Cluster and compare",
+        value: clusterCount,
+        note: "Event-shaped clusters"
+      },
+      {
+        key: "admit_hold",
+        label: "Admit or hold out",
+        value: `${admittedCount} / ${heldOutCount}`,
+        note: "Visible / refused"
+      },
+      {
+        key: "update_metrics",
+        label: "Update metrics",
+        value: signalVelocity,
+        note: "Signal velocity"
+      },
+      {
+        key: "mirror_correction",
+        label: "Mirror correction audit",
+        value: correctionCount,
+        note: "Correction clusters"
+      },
+      {
+        key: "tree_of_relief",
+        label: "Tree of Relief",
+        value: treeState,
+        note: "Current-window resolve"
+      }
+    ]
+  };
+}
+
 function buildBaseDashboard() {
   const window = buildWindow();
 
@@ -860,7 +915,7 @@ function buildBaseDashboard() {
       title: "Live Signals Overlay",
       subtitle: "Descriptive monitoring layer for event intensity, source mix, and correction-aware signal flow.",
       disclaimer:
-        "Non-predictive use only. This dashboard summarizes observed signals in the active window. It does not forecast outcomes or assign future probabilities.",
+        "This dashboard summarizes observed signals in the active window. It does not forecast outcomes or assign future probabilities.",
     },
     metrics: {
       cards: buildMetricCards(),
@@ -914,6 +969,15 @@ function buildBaseDashboard() {
       items: buildMockEventItems(),
     },
     held_out_field: buildMockHeldOutField(),
+    signal_cycle: buildFixtureSignalCycle({
+      rawItemCount: 28,
+      clusterCount: 12,
+      admittedCount: 5,
+      heldOutCount: 7,
+      correctionCount: 1,
+      signalVelocity: 78,
+      treeState: "contained"
+    }),
     tone_metrics: buildFixtureToneMetrics("mock"),
     tree_of_relief: buildFixtureTreeOfRelief("mock"),
     structural_read: buildFixtureStructuralRead("mock"),
@@ -931,6 +995,7 @@ function buildBaseDashboard() {
         "Time window: rolling 6 hours.",
         "Clusters are counted instead of individual headlines.",
         "Confidence scores represent evidence quality, not future certainty.",
+        "Mock correction sample: one visible infrastructure cluster is marked clarified and reflected in Correction Rate.",
       ],
     },
     system_status: {
@@ -971,6 +1036,15 @@ export function getDashboardFixture(mode = "mock") {
     );
     dashboard.recent_events.items = buildDegradedEventItems();
     dashboard.held_out_field = buildDegradedHeldOutField();
+    dashboard.signal_cycle = buildFixtureSignalCycle({
+      rawItemCount: 24,
+      clusterCount: 14,
+      admittedCount: 5,
+      heldOutCount: 9,
+      correctionCount: 1,
+      signalVelocity: 78,
+      treeState: "thin"
+    });
     dashboard.tone_metrics = buildFixtureToneMetrics("degraded");
     dashboard.tree_of_relief = buildFixtureTreeOfRelief("degraded");
     dashboard.structural_read = buildFixtureStructuralRead("degraded");
@@ -986,6 +1060,15 @@ export function getDashboardFixture(mode = "mock") {
     dashboard.metrics.cards = [];
     dashboard.composition.items = [];
     dashboard.recent_events.items = [];
+    dashboard.signal_cycle = buildFixtureSignalCycle({
+      rawItemCount: 0,
+      clusterCount: 0,
+      admittedCount: 0,
+      heldOutCount: 0,
+      correctionCount: 0,
+      signalVelocity: 0,
+      treeState: "empty"
+    });
     dashboard.held_out_field.held_out_count = 0;
     dashboard.held_out_field.summary_note = "No held-out clusters in this window.";
     dashboard.held_out_field.top_suppression_reasons = [];

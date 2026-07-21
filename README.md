@@ -1,6 +1,72 @@
 # Live Signals App
 
+Live Signals is a non-predictive, correction-aware situational monitor that shows what entered the field, what was admitted, what was refused, what changed, and what remains unresolved.
+
 This repo contains the current MT-07 Live Signals app: a local operator surface where MT-07 governs how wording becomes visible state, metrics, and audit.
+
+## Built with Codex and GPT-5.6
+
+This project was prepared for OpenAI Build Week as an existing Myth-Tech Delta / MT-07 signal instrument that was extended, hardened, and packaged with Codex and GPT-5.6 during the submission window.
+
+Codex accelerated the engineering loop by:
+
+- inspecting the existing MT-07 architecture and route boundaries
+- implementing and refining the six-stage Signal Cycle
+- correcting screenshot/source mismatches in the rendered app
+- distinguishing the synthetic MT-07 shell from the live/local API board
+- adding historical window, basket recall, and infrastructure backfill lanes as bounded support surfaces
+- adding regression tests and running targeted verification passes
+- tightening README, demo, and submission-freeze documentation
+
+GPT-5.6 supported the product reasoning layer by:
+
+- helping translate the MT-07 / Weaver doctrine into concrete app contracts
+- shaping the non-predictive, correction-aware product language
+- reviewing operator-lane boundaries, held-out evidence, and audit surfaces
+- helping decide which features belonged in the Build Week freeze and which should remain future work
+
+Human-directed decisions preserved the core identity of the app: MT-07 remains the governing signal layer, the board remains non-predictive, held-out evidence stays visible, and Tree of Relief stays an explanatory audit surface rather than a forecasting claim.
+
+## Judge Quickstart
+
+The shortest no-credentials demo path is:
+
+```bash
+npm install
+npm run start:demo
+```
+
+Then open:
+
+```text
+http://localhost:8787
+```
+
+Use `Mock` mode for the deterministic correction demonstration. Mock mode includes one clarified event, a `9%` Correction Rate, held-out evidence, metric explanation drawers, and the visible Signal Cycle. This path does not require GDELT, ACLED, RSS, Event Registry, Claude, or other external API credentials.
+
+For the live/local API path:
+
+```bash
+npm run db:init
+npm run ingest:once
+npm run snapshot:once
+npm run start:live
+```
+
+Runtime notes:
+
+- Tested locally with Node `v24.14.0`; Node `20+` is recommended.
+- The app is cross-platform Node/Express/HTML/JS. PowerShell helper scripts are optional Windows convenience scripts, not required for judge testing.
+- Optional environment variables are documented in `.env.example`.
+- External data lanes are optional. `RSS_ENABLED`, `ACLED_ENABLED`, `EVENT_REGISTRY_ENABLED`, and `CLAUDE_HELPER_ENABLED` default to disabled/safe behavior unless configured.
+
+## Submission Checklist
+
+- Repository URL: provide this repo or a judge-accessible fork.
+- Demo video: public YouTube video under three minutes with audio explaining Codex and GPT-5.6 usage.
+- Codex evidence: include the `/feedback` Codex Session ID from the primary build thread in the Devpost form.
+- README evidence: this file documents setup, modes, sample data behavior, Codex/GPT-5.6 usage, and the human-directed product boundaries.
+- Testing path: run `npm test` for the current automated regression suite.
 
 ## What It Includes
 
@@ -24,6 +90,13 @@ External feeds never touch the board directly. They pass through connectors, nor
 - `degraded`: curated fallback fixture with a five-row tape for continuity
 - `mock`: broader synthetic fixture set for UI and metric testing
 - `empty`: explicit no-surface fixture state for honesty and edge-case testing
+
+## Submission Freeze Notes
+
+- The MT-07 shell is a synthetic simulation harness for axis behavior.
+- The Live Signals overlay is the live/local API surface for metrics, event tape, held-out evidence, metric drawers, and the Signal Cycle.
+- The Signal Cycle path is `Incoming sources -> Cluster and compare -> Admit or hold out -> Update metrics -> Mirror correction audit -> Tree of Relief`.
+- Mock mode includes a deterministic correction sample so Correction Rate can be demonstrated without altering live field truth.
 
 ## Current Backend Capabilities
 
@@ -55,7 +128,7 @@ The current front end is matched to:
 
 ## Claude Code Repo Tools
 
-The project-scoped read-only MCP server in [`.mcp.json`](C:/Users/Neltron/Documents/Playground/.mcp.json) currently exposes:
+The project-scoped read-only MCP server in [`.mcp.json`](./.mcp.json) currently exposes:
 
 - `get_dashboard`
   - reads the current dashboard bundle from the local Signal app API
@@ -141,6 +214,8 @@ MT-07 remains sovereign over what appears as field truth.
 - One instrument for the field; one assistant for the craft.
 - MT-07 wording contract checkpoint: [MT07_WORDING_V1_2_CHECKPOINT_2026-03-28.md](./MT07_WORDING_V1_2_CHECKPOINT_2026-03-28.md)
 - MT-07 tone layer checkpoint: [MT07_TONE_LAYER_CHECKPOINT_2026-04-02.md](./MT07_TONE_LAYER_CHECKPOINT_2026-04-02.md)
+- MT-07 UAP concept note: [MT07_UAP_APP_CONCEPT.md](./MT07_UAP_APP_CONCEPT.md)
+- MT-07 UAP anomaly watch fit plan: [MT07_UAP_ANOMALY_WATCH_FIT_PLAN.md](./MT07_UAP_ANOMALY_WATCH_FIT_PLAN.md)
 - Claude Code repo-side integration plan: [CLAUDE_CODE_SIGNAL_APP_INTEGRATION_PLAN.md](./CLAUDE_CODE_SIGNAL_APP_INTEGRATION_PLAN.md)
 - Claude Agent SDK embed plan: [CLAUDE_AGENT_SDK_SIGNAL_APP_EMBED_PLAN.md](./CLAUDE_AGENT_SDK_SIGNAL_APP_EMBED_PLAN.md)
 - Claude Agent SDK Phase 1 repo skeleton: [CLAUDE_AGENT_SDK_PHASE1_REPO_SKELETON.md](./CLAUDE_AGENT_SDK_PHASE1_REPO_SKELETON.md)

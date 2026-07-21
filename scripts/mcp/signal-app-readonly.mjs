@@ -25,7 +25,9 @@ const HEALTH_PATHS = new Map([
   ["cluster_quality", "/api/health/cluster-quality"],
   ["escalation_pressure", "/api/health/escalation-pressure"],
   ["acled_proof", "/api/health/acled-proof"],
-  ["lane_compare", "/api/health/lane-compare"]
+  ["lane_compare", "/api/health/lane-compare"],
+  ["basket_recall", "/api/health/basket-recall"],
+  ["infrastructure_backfill", "/api/health/infrastructure-backfill"]
 ]);
 
 function getBaseUrl(env = process.env) {

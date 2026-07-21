@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS raw_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  domain TEXT NOT NULL DEFAULT 'signals',
   source_name TEXT NOT NULL,
   source_type TEXT NOT NULL,
   query_basket TEXT,
@@ -21,10 +22,11 @@ CREATE TABLE IF NOT EXISTS raw_items (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_raw_unique
-ON raw_items(source_type, external_id);
+ON raw_items(domain, source_type, external_id);
 
 CREATE TABLE IF NOT EXISTS processed_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  domain TEXT NOT NULL DEFAULT 'signals',
   cluster_id TEXT NOT NULL,
   window_start TEXT NOT NULL,
   window_end TEXT NOT NULL,
@@ -41,10 +43,11 @@ CREATE TABLE IF NOT EXISTS processed_events (
 );
 
 CREATE INDEX IF NOT EXISTS idx_processed_window
-ON processed_events(window_start, window_end);
+ON processed_events(domain, window_start, window_end);
 
 CREATE TABLE IF NOT EXISTS metric_snapshots (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  domain TEXT NOT NULL DEFAULT 'signals',
   window_start TEXT NOT NULL,
   window_end TEXT NOT NULL,
   generated_at TEXT NOT NULL,
@@ -53,4 +56,4 @@ CREATE TABLE IF NOT EXISTS metric_snapshots (
 );
 
 CREATE INDEX IF NOT EXISTS idx_snapshots_window
-ON metric_snapshots(window_start, window_end, generated_at);
+ON metric_snapshots(domain, window_start, window_end, generated_at);

@@ -1,12 +1,17 @@
 import { Router } from "express";
-import { getSnapshotBundle, buildSnapshot } from "../services/snapshotService.js";
+import { getSnapshotBundleForRequest } from "../services/snapshotService.js";
 
 const router = Router();
 
-router.get("/", async (_req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
-    const bundle = getSnapshotBundle() || (await buildSnapshot(6));
-    res.json(bundle.history);
+    const domain = req.query.domain === "uap" ? "uap" : "signals";
+    const { bundle, request } = await getSnapshotBundleForRequest(req.query, { domain });
+    res.json({
+      ...bundle.history,
+      window: request.window_label,
+      request
+    });
   } catch (error) {
     next(error);
   }

@@ -690,7 +690,17 @@ function metricStatus(key, value) {
   return value >= 0.6 ? "elevated" : "healthy";
 }
 
-function buildMetricCard({ key, label, value, unit, baseline, sparkline }) {
+function normalizeBundleDomain(domain = "signals") {
+  return String(domain || "").trim().toLowerCase() === "uap" ? "uap" : "signals";
+}
+
+function withDomainPath(path, domain = "signals") {
+  const scopedDomain = normalizeBundleDomain(domain);
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}domain=${encodeURIComponent(scopedDomain)}`;
+}
+
+function buildMetricCard({ key, label, value, unit, baseline, sparkline, domain = "signals" }) {
   const delta = formatDelta(value, baseline, unit);
   const direction = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
 
@@ -710,7 +720,7 @@ function buildMetricCard({ key, label, value, unit, baseline, sparkline }) {
     delta_direction: direction,
     status: metricStatus(key, value),
     sparkline,
-    explain_path: `/api/explain/metric/${key}?window=6h`
+    explain_path: withDomainPath(`/api/explain/metric/${key}?window=6h`, domain)
   };
 }
 
@@ -1371,11 +1381,13 @@ function buildEventItems(clusters, options = {}) {
   const {
     limit = 12,
     eventIdPrefix = "evt",
-    includeHeldOutNotes = false
+    includeHeldOutNotes = false,
+    domain = "signals"
   } = options;
 
   return sortClustersForTape(clusters).slice(0, limit).map((cluster, index) => ({
     event_id: `${eventIdPrefix}_${String(index + 1).padStart(3, "0")}`,
+    domain: normalizeBundleDomain(domain),
     cluster_id: cluster.cluster_id,
     observed_at: cluster.event_time,
     region: cluster.region,
@@ -1398,11 +1410,14 @@ function buildEventItems(clusters, options = {}) {
         : "",
     primary_source_labels: cluster.source_names || [],
     suppression_reasons: cluster.suppression_reasons || [],
-    detail_path: `/api/events?window=6h&event_id=${encodeURIComponent(cluster.cluster_id)}`
+    detail_path: withDomainPath(
+      `/api/events?window=6h&event_id=${encodeURIComponent(cluster.cluster_id)}`,
+      domain
+    )
   }));
 }
 
-function buildCategoryEventItems(clusters = []) {
+function buildCategoryEventItems(clusters = [], domain = "signals") {
   const categoryMap = {};
 
   for (const key of [...new Set(clusters.map((cluster) => cluster.category).filter(Boolean))]) {
@@ -1411,7 +1426,8 @@ function buildCategoryEventItems(clusters = []) {
       {
         limit: 25,
         eventIdPrefix: `cat_${key}`,
-        includeHeldOutNotes: true
+        includeHeldOutNotes: true,
+        domain
       }
     );
   }
@@ -1431,7 +1447,7 @@ export function scoreClustersForTape(clusters = []) {
   });
 }
 
-function buildComposition(clusters) {
+function buildComposition(clusters, domain = "signals") {
   const total = clusters.length || 1;
   const counts = new Map();
 
@@ -1454,7 +1470,7 @@ function buildComposition(clusters) {
         cluster_count: count,
         share: count / total,
         display: `${Math.round((count / total) * 100)}%`,
-        event_path: `/api/events?window=6h&category=${key}`
+        event_path: withDomainPath(`/api/events?window=6h&category=${key}`, domain)
       };
     });
 }
@@ -1765,13 +1781,75 @@ function buildNotes(metrics, clusters, options = {}) {
   return notes.slice(0, 4);
 }
 
+export function buildSignalCycle({
+  rawItemCount,
+  clusterCount,
+  visibleClusters,
+  suppressedClusterCount,
+  correctionCount,
+  metrics,
+  treeOfRelief
+}) {
+  const visibleCount = visibleClusters.length;
+
+  return {
+    title: "Signal Cycle",
+    subtitle: "Evidence path for the active window",
+    authority: "audit_display_only",
+    summary: `${rawItemCount} incoming items -> ${clusterCount} clusters -> ${visibleCount} admitted -> ${suppressedClusterCount} held out -> ${correctionCount} corrections`,
+    steps: [
+      {
+        key: "incoming_sources",
+        label: "Incoming sources",
+        value: rawItemCount,
+        note: "Raw intake observed"
+      },
+      {
+        key: "cluster_compare",
+        label: "Cluster and compare",
+        value: clusterCount,
+        note: "Event-shaped clusters"
+      },
+      {
+        key: "admit_hold",
+        label: "Admit or hold out",
+        value: `${visibleCount} / ${suppressedClusterCount}`,
+        note: "Visible / refused"
+      },
+      {
+        key: "update_metrics",
+        label: "Update metrics",
+        value: metrics.signalVelocity,
+        note: "Signal velocity"
+      },
+      {
+        key: "mirror_correction",
+        label: "Mirror correction audit",
+        value: correctionCount,
+        note: "Correction clusters"
+      },
+      {
+        key: "tree_of_relief",
+        label: "Tree of Relief",
+        value: treeOfRelief.state_label || treeOfRelief.state || "unknown",
+        note: "Current-window resolve"
+      }
+    ]
+  };
+}
+
 export function scoreDashboardBundle({
   windowStart,
   windowEnd,
   clusters,
+  domain = "signals",
+  windowHours = 6,
+  rawItemCount = clusters.length,
   temporalState = null,
   modeTag = null
 }) {
+  const scopedDomain = normalizeBundleDomain(domain);
+  const windowLabel = Number(windowHours) === 168 ? "7d" : `${Number(windowHours) || 6}h`;
   const scoredClusters = scoreClustersForTape(clusters);
   const clusterCount = clusters.length;
   const distinctSourceNames = new Set();
@@ -1788,7 +1866,7 @@ export function scoreDashboardBundle({
   const multiSource = scoredClusters.filter((cluster) => (cluster.source_family_count || 0) >= 2);
   const surfaceSelection = buildSurfaceSelection(scoredClusters);
   const visibleClusters = surfaceSelection.visibleClusters;
-  const eventItems = buildEventItems(visibleClusters);
+  const eventItems = buildEventItems(visibleClusters, { domain: scopedDomain });
   const visibleSampleState = surfaceSelection.visibleSampleState;
   const visibleSampleNote = sampleStateNote(visibleSampleState);
   const regionalConcentration = computeRegionalShares(eventItems);
@@ -1835,9 +1913,10 @@ export function scoreDashboardBundle({
     escalationPressure: escalation.value
   };
   const sparklines = buildSparklines(metrics);
-  const compositionItems = buildComposition(scoredClusters);
-  const categoryEventItems = buildCategoryEventItems(scoredClusters);
+  const compositionItems = buildComposition(scoredClusters, scopedDomain);
+  const categoryEventItems = buildCategoryEventItems(scoredClusters, scopedDomain);
   const heldOutField = buildHeldOutField(scoredClusters, visibleClusters);
+  const suppressedClusterCount = Math.max(0, clusterCount - visibleClusters.length);
   const treeOfRelief = buildMomentResolve({
     scoredClusters,
     visibleClusters,
@@ -1859,35 +1938,49 @@ export function scoreDashboardBundle({
     toneMetrics,
     modeTag
   });
+  const signalCycle = buildSignalCycle({
+    rawItemCount,
+    clusterCount,
+    visibleClusters,
+    suppressedClusterCount,
+    correctionCount: corrections,
+    metrics,
+    treeOfRelief
+  });
 
   const dashboard = {
     meta: {
       api_version: "1.0.0",
       generated_at: new Date().toISOString(),
-      window: { label: "6h", start: windowStart, end: windowEnd },
+      domain: scopedDomain,
+      window: { label: windowLabel, start: windowStart, end: windowEnd },
       refresh_seconds: 300,
       mode: "situational_awareness",
       predictive: false,
       timezone: "UTC"
     },
     banner: {
-      title: "Live Signals Overlay",
-      subtitle: "Descriptive monitoring layer for event intensity, source mix, and correction-aware signal flow.",
-      disclaimer: "Non-predictive use only. This dashboard summarizes observed signals in the active window. It does not forecast outcomes or assign future probabilities."
+      title: scopedDomain === "uap" ? "MT07 Anomaly Watch" : "Live Signals Overlay",
+      subtitle: scopedDomain === "uap"
+        ? "Descriptive monitoring layer for anomaly claims, disclosure discourse, and correction-aware signal flow."
+        : "Descriptive monitoring layer for event intensity, source mix, and correction-aware signal flow.",
+      disclaimer: scopedDomain === "uap"
+        ? "This board monitors anomaly claims, provenance, and correction-aware signal flow. It does not determine metaphysical truth."
+        : "This dashboard summarizes observed signals in the active window. It does not forecast outcomes or assign future probabilities."
     },
     metrics: {
       cards: [
-        buildMetricCard({ key: "signal_velocity", label: "Signal Velocity", value: signalVelocity, unit: "score", baseline: Math.max(0, signalVelocity - 6), sparkline: sparklines.signal_velocity }),
-        buildMetricCard({ key: "volatility_index", label: "Volatility Index", value: volatilityIndex, unit: "ratio", baseline: Math.max(0, volatilityIndex - 0.08), sparkline: sparklines.volatility_index }),
-        buildMetricCard({ key: "source_diversity", label: "Source Diversity", value: sourceDiversity, unit: "count", baseline: Math.max(1, sourceDiversity - 1), sparkline: sparklines.source_diversity }),
-        buildMetricCard({ key: "escalation_pressure", label: "Escalation Pressure", value: escalation.value, unit: "score", baseline: Math.max(0, escalation.value - 6), sparkline: sparklines.escalation_pressure }),
-        buildMetricCard({ key: "correction_rate", label: "Correction Rate", value: correctionRate, unit: "percent", baseline: Math.min(1, correctionRate + 0.03), sparkline: sparklines.correction_rate }),
-        buildMetricCard({ key: "cross_source_coherence", label: "Cross-Source Coherence", value: coherence, unit: "ratio", baseline: Math.max(0, coherence - 0.05), sparkline: sparklines.cross_source_coherence }),
-        buildMetricCard({ key: "uncertainty_index", label: "Uncertainty Index", value: uncertainty, unit: "ratio", baseline: Math.min(1, uncertainty + 0.04), sparkline: sparklines.uncertainty_index })
+        buildMetricCard({ key: "signal_velocity", label: "Signal Velocity", value: signalVelocity, unit: "score", baseline: Math.max(0, signalVelocity - 6), sparkline: sparklines.signal_velocity, domain: scopedDomain }),
+        buildMetricCard({ key: "volatility_index", label: "Volatility Index", value: volatilityIndex, unit: "ratio", baseline: Math.max(0, volatilityIndex - 0.08), sparkline: sparklines.volatility_index, domain: scopedDomain }),
+        buildMetricCard({ key: "source_diversity", label: "Source Diversity", value: sourceDiversity, unit: "count", baseline: Math.max(1, sourceDiversity - 1), sparkline: sparklines.source_diversity, domain: scopedDomain }),
+        buildMetricCard({ key: "escalation_pressure", label: "Escalation Pressure", value: escalation.value, unit: "score", baseline: Math.max(0, escalation.value - 6), sparkline: sparklines.escalation_pressure, domain: scopedDomain }),
+        buildMetricCard({ key: "correction_rate", label: "Correction Rate", value: correctionRate, unit: "percent", baseline: Math.min(1, correctionRate + 0.03), sparkline: sparklines.correction_rate, domain: scopedDomain }),
+        buildMetricCard({ key: "cross_source_coherence", label: "Cross-Source Coherence", value: coherence, unit: "ratio", baseline: Math.max(0, coherence - 0.05), sparkline: sparklines.cross_source_coherence, domain: scopedDomain }),
+        buildMetricCard({ key: "uncertainty_index", label: "Uncertainty Index", value: uncertainty, unit: "ratio", baseline: Math.min(1, uncertainty + 0.04), sparkline: sparklines.uncertainty_index, domain: scopedDomain })
       ]
     },
     composition: {
-      title: "Signal Composition",
+      title: scopedDomain === "uap" ? "Field Composition" : "Signal Composition",
       basis: "event_clusters",
       items: compositionItems,
       regional_concentration: regionalConcentration,
@@ -1900,13 +1993,14 @@ export function scoreDashboardBundle({
       }
     },
     recent_events: {
-      title: "Visible Event Tape",
+      title: scopedDomain === "uap" ? "Visible Anomaly Tape" : "Visible Event Tape",
       sort: "signal_strength_then_recency",
       sort_note: "Strength-ranked, then recency",
       items: eventItems,
       category_items: categoryEventItems
     },
     held_out_field: heldOutField,
+    signal_cycle: signalCycle,
     tone_metrics: toneMetrics,
     tree_of_relief: treeOfRelief,
     structural_read: structuralRead,
@@ -1921,22 +2015,26 @@ export function scoreDashboardBundle({
     method_snapshot: {
       title: "Method Snapshot",
       items: [
-        "Time window: rolling 6 hours.",
+        `Time window: rolling ${windowLabel}.`,
         "Clusters are counted instead of individual headlines.",
         "Confidence scores represent evidence quality, not future certainty.",
+        scopedDomain === "uap"
+          ? "Domain: UAP anomaly watch."
+          : "Domain: live signals overlay.",
         `Visible sample state: ${visibleSampleState.replace(/_/g, " ")}.`,
         `Surface recovery mode: ${surfaceSelection.surfaceRecoveryMode}.`
-      ]
+      ].filter(Boolean)
     },
     system_status: {
       ingestion: "healthy",
       notes: []
     },
     trace: {
-      raw_item_count: clusterCount,
+      domain: scopedDomain,
+      raw_item_count: rawItemCount,
       processed_cluster_count: clusterCount,
       visible_tape_cluster_count: visibleClusters.length,
-      suppressed_cluster_count: Math.max(0, clusterCount - visibleClusters.length),
+      suppressed_cluster_count: suppressedClusterCount,
       regional_concentration: regionalConcentration,
       sample_state: visibleSampleState,
       surface_recovery_mode: surfaceSelection.surfaceRecoveryMode,

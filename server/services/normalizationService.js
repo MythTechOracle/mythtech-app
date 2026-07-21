@@ -2153,6 +2153,7 @@ function buildNormalizedSeed(raw) {
 
   return {
     rawId: raw.id,
+    domain: raw.domain || "signals",
     payload,
     rawRegion: raw.region || null,
     rawCountry: raw.country || null,
@@ -2242,6 +2243,7 @@ function finalizeNormalizedItem(seed, options = {}) {
 
   return {
     rawId: seed.rawId,
+    domain: seed.domain || "signals",
     sourceName: seed.sourceName,
     sourceFamily: seed.sourceFamily,
     sourceType: seed.sourceType,

@@ -48,6 +48,18 @@ const modeToFixture = {
   mock: "mock",
 };
 
+function normalizeDomain(domain = "signals") {
+  return String(domain || "").trim().toLowerCase() === "uap" ? "uap" : "signals";
+}
+
+function fixtureModeForDomain(mode, domain = "signals") {
+  const scopedDomain = normalizeDomain(domain);
+  if (scopedDomain === "uap") {
+    return "empty";
+  }
+  return mode;
+}
+
 function joinApiPath(baseUrl, path) {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   if (!baseUrl) {
@@ -84,6 +96,34 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function applyDomainDashboardSurface(dashboard, domain = "signals") {
+  const scopedDomain = normalizeDomain(domain);
+  if (scopedDomain !== "uap") {
+    return dashboard;
+  }
+
+  const next = clone(dashboard);
+  next.meta = {
+    ...(next.meta || {}),
+    domain: scopedDomain,
+  };
+  next.banner = {
+    ...(next.banner || {}),
+    title: "MT07 Anomaly Watch",
+    subtitle: "Descriptive monitoring layer for anomaly claims, disclosure discourse, and correction-aware signal flow.",
+    disclaimer: "This board monitors anomaly claims, provenance, and correction-aware signal flow. It does not determine metaphysical truth.",
+  };
+  next.composition = {
+    ...(next.composition || {}),
+    title: "Field Composition",
+  };
+  next.recent_events = {
+    ...(next.recent_events || {}),
+    title: "Visible Anomaly Tape",
+  };
+  return next;
+}
+
 function rewriteDashboardLinks(dashboard, baseUrl) {
   const next = clone(dashboard);
 
@@ -103,14 +143,20 @@ function rewriteDashboardLinks(dashboard, baseUrl) {
   return next;
 }
 
-export async function loadDashboardResponse({ fixtureMode, baseUrl = "/api" } = {}) {
+export async function loadDashboardResponse({ fixtureMode, baseUrl = "/api", domain = "signals" } = {}) {
+  const scopedDomain = normalizeDomain(domain);
   const normalizedMode = modeToFixture[fixtureMode] || "live_api";
+  const fallbackFixtureMode = fixtureModeForDomain("mock", scopedDomain);
 
   if (normalizedMode !== "live_api") {
+    const fixtureMode = fixtureModeForDomain(normalizedMode, scopedDomain);
     return {
-      dashboard: rewriteDashboardLinks(getDashboardFixture(normalizedMode), baseUrl),
-      history: getHistoryFixture(normalizedMode),
-      explain: getExplainFixture(normalizedMode),
+      dashboard: rewriteDashboardLinks(
+        applyDomainDashboardSurface(getDashboardFixture(fixtureMode), scopedDomain),
+        baseUrl
+      ),
+      history: getHistoryFixture(fixtureMode),
+      explain: getExplainFixture(fixtureMode),
       transport: {
         source: "fixture_mode",
         selectedMode: normalizedMode,
@@ -130,17 +176,26 @@ export async function loadDashboardResponse({ fixtureMode, baseUrl = "/api" } = 
     };
   }
 
-  const dashboardPath = joinApiPath(baseUrl, "/dashboard?window=6h");
-  const historyPath = joinApiPath(baseUrl, "/metrics/history?window=6h&compare=24h,7d");
+  const dashboardPath = joinApiPath(baseUrl, `/dashboard?window=6h&domain=${encodeURIComponent(scopedDomain)}`);
+  const historyPath = joinApiPath(
+    baseUrl,
+    `/metrics/history?window=6h&compare=24h,7d&domain=${encodeURIComponent(scopedDomain)}`
+  );
 
-  const dashboardResult = await apiFetchWithMeta(dashboardPath, getDashboardFixture("mock"));
-  const historyResult = await apiFetchWithMeta(historyPath, getHistoryFixture("mock"));
+  const dashboardResult = await apiFetchWithMeta(
+    dashboardPath,
+    applyDomainDashboardSurface(getDashboardFixture(fallbackFixtureMode), scopedDomain)
+  );
+  const historyResult = await apiFetchWithMeta(historyPath, getHistoryFixture(fallbackFixtureMode));
   const eventsResult = await apiFetchWithMeta(
-    joinApiPath(baseUrl, "/events?window=6h&sort=observed_at:desc&limit=50"),
+    joinApiPath(
+      baseUrl,
+      `/events?window=6h&sort=observed_at:desc&limit=50&domain=${encodeURIComponent(scopedDomain)}`
+    ),
     { items: dashboardResult.data.recent_events?.items || [] }
   );
   const compositionResult = await apiFetchWithMeta(
-    joinApiPath(baseUrl, "/composition?window=6h"),
+    joinApiPath(baseUrl, `/composition?window=6h&domain=${encodeURIComponent(scopedDomain)}`),
     { items: dashboardResult.data.composition?.items || [] }
   );
   const dashboard = dashboardResult.data;
@@ -169,7 +224,7 @@ export async function loadDashboardResponse({ fixtureMode, baseUrl = "/api" } = 
       baseUrl
     ),
     history,
-    explain: getExplainFixture("mock"),
+    explain: getExplainFixture(fallbackFixtureMode),
     transport: {
       source: dashboardResult.fallbackUsed || isFallbackSnapshot ? "fixture_fallback" : "live_api",
       selectedMode: normalizedMode,

@@ -750,6 +750,7 @@ export function buildClusters(items = [], options = {}) {
       const comparisonTokens = normalizeText(item.comparisonText || itemText);
       const itemActionTokens = actionTokens(comparisonTokens.length ? comparisonTokens : itemTokens);
       const cluster = {
+        domain: item.domain || "signals",
         category: item.category,
         eventLocation: item.eventLocation || null,
         region: item.region || "Unknown",
@@ -908,6 +909,7 @@ export function buildClusters(items = [], options = {}) {
 
       return {
         cluster_id: makeClusterId(cluster),
+        domain: cluster.domain || "signals",
         event_time: cluster.lastSeen,
         event_location: cluster.eventLocation || null,
         event_country: cluster.country || null,

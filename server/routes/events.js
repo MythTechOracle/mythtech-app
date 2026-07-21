@@ -1,12 +1,13 @@
 import { Router } from "express";
-import { getSnapshotBundle, buildSnapshot } from "../services/snapshotService.js";
+import { getSnapshotBundleForRequest } from "../services/snapshotService.js";
 import { enrichEventItemsWithTranslation } from "../services/translationService.js";
 
 const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const bundle = getSnapshotBundle() || (await buildSnapshot(6));
+    const domain = req.query.domain === "uap" ? "uap" : "signals";
+    const { bundle, request } = await getSnapshotBundleForRequest(req.query, { domain });
     let items = bundle.dashboard.recent_events.items || [];
 
     const category = req.query.category;
@@ -25,6 +26,8 @@ router.get("/", async (req, res, next) => {
 
     res.json({
       title: bundle.dashboard.recent_events.title,
+      window: request.window_label,
+      request,
       items
     });
   } catch (error) {

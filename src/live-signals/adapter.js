@@ -224,6 +224,20 @@ export function mapDashboardResponseToViewModel(response) {
       })),
       empty: (response.held_out_field?.held_out_count || 0) === 0,
     },
+    signalCycle: response.signal_cycle
+      ? {
+          title: response.signal_cycle.title || "Signal Cycle",
+          subtitle: response.signal_cycle.subtitle || "",
+          authority: response.signal_cycle.authority || "audit_display_only",
+          summary: response.signal_cycle.summary || "",
+          steps: (response.signal_cycle.steps || []).map((step) => ({
+            key: step.key || step.label,
+            label: step.label || fallbackMetricLabel(step.key || "step"),
+            value: String(step.value ?? "-"),
+            note: step.note || "",
+          })),
+        }
+      : null,
     structuralRead: response.structural_read
       ? {
           title: response.structural_read.title || "Structural Read",

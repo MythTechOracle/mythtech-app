@@ -4,7 +4,12 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
+    "start:demo": "node server.js",
+    "test": "node --test ./tests/*.test.js",
+    "test:basket-recall": "node --test ./tests/basket-recall-service.test.js",
     "test:helper-readonly": "node --test ./tests/claude-helper-readonly-policy.test.js",
+    "test:infrastructure-backfill": "node --test ./tests/infrastructure-backfill-service.test.js",
+    "test:snapshot-window": "node --test ./tests/snapshot-window-request.test.js",
     "db:init": "node ./scripts/init-db.js",
     "ingest:once": "node ./scripts/run-ingest-once.js",
     "ingest:acled:once": "node ./scripts/run-ingest-acled-once.js",

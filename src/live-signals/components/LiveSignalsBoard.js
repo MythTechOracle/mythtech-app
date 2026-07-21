@@ -111,6 +111,7 @@ export function renderLiveSignalsBoard(root, props) {
     composition: { title: "Signal Composition", rows: [], regions: [], regionMeta: null },
     eventTape: { title: "Visible Event Tape", note: "", rows: [], empty: true },
     heldOutField: { title: "Held-Out Field", subtitle: "", count: 0, summary: "", reasons: [], items: [], empty: true },
+    signalCycle: null,
     treeOfRelief: null,
     structuralRead: null,
     notes: { title: "Volatility Notes", items: [] },
@@ -135,7 +136,8 @@ export function renderLiveSignalsBoard(root, props) {
   const treeOfRelief = safeVm.treeOfRelief ?? null;
   const structuralRead = safeVm.structuralRead ?? null;
   const heldOutReasons = heldOutField.reasons ?? [];
-  const heldOutItems = heldOutField.items ?? [];
+  const heldOutItems = (heldOutField.items ?? []).slice(0, 4);
+  const signalCycle = safeVm.signalCycle ?? null;
   const noteItems = safeVm.notes.items ?? [];
   const methodItems = safeVm.method.items ?? [];
   const isFixtureMode = mode !== "live_api" && mode !== "live";
@@ -185,10 +187,19 @@ export function renderLiveSignalsBoard(root, props) {
         }
       </div>
 
+      <div class="panel panel-muted signal-cycle" style="display:${signalCycle ? "block" : "none"}">
+        <div class="panel-heading">
+          <h3>${escapeHtml(signalCycle?.title || "Signal Cycle")}</h3>
+          <span class="small muted">${escapeHtml(signalCycle?.authority || "audit_display_only")}</span>
+        </div>
+        <div class="signal-cycle__rail" data-ls-signal-cycle></div>
+        <div class="small muted signal-cycle__summary">${escapeHtml(signalCycle?.summary || "")}</div>
+      </div>
+
       <div class="metrics" data-ls-metrics></div>
 
       <div class="cols-3 live-signals-board__triptych">
-        <div class="panel">
+        <div class="panel live-signals-board__method-panel">
           <div class="panel-heading">
             <h3>${escapeHtml(safeVm.composition.title)}</h3>
             <span class="small muted">By cluster share</span>
@@ -370,6 +381,23 @@ export function renderLiveSignalsBoard(root, props) {
   });
   if (!metricCards.length) {
     metricsRoot.innerHTML = '<div class="small muted">No metric cards available.</div>';
+  }
+
+  const signalCycleRoot = root.querySelector("[data-ls-signal-cycle]");
+  if (signalCycleRoot && signalCycle?.steps?.length) {
+    signalCycle.steps.forEach((step, index) => {
+      const item = document.createElement("div");
+      item.className = "signal-cycle__step";
+      item.innerHTML = `
+        <div class="signal-cycle__index">${escapeHtml(String(index + 1).padStart(2, "0"))}</div>
+        <div class="signal-cycle__label">${escapeHtml(step.label)}</div>
+        <div class="signal-cycle__value">${escapeHtml(step.value)}</div>
+        <div class="signal-cycle__note">${escapeHtml(step.note)}</div>
+      `;
+      signalCycleRoot.appendChild(item);
+    });
+  } else if (signalCycleRoot) {
+    signalCycleRoot.innerHTML = '<div class="small muted">No signal cycle data available.</div>';
   }
 
   const compositionRoot = root.querySelector("[data-ls-composition]");

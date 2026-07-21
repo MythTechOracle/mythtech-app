@@ -25,3 +25,10 @@ tmp/**/session_replay_verify_diffs.csv
 tmp/**/candidate_prefix.json
 tmp/helper-server.stderr.log
 tmp/helper-server.stdout.log
+tmp/*smoke*.sqlite
+tmp/*smoke*.sqlite-shm
+tmp/*smoke*.sqlite-wal
+tmp/signal-*.err.log
+tmp/signal-*.out.log
+tmp/delta_ci_*/
+tmp/golden_verify_*/

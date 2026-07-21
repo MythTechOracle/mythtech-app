@@ -369,6 +369,63 @@ const hostStyles = `
     font-weight: 700;
   }
 
+  .signal-cycle {
+    overflow: hidden;
+  }
+
+  .signal-cycle__rail {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .signal-cycle__step {
+    min-width: 0;
+    min-height: 112px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.16);
+  }
+
+  .signal-cycle__index,
+  .signal-cycle__label,
+  .signal-cycle__note {
+    color: var(--muted);
+  }
+
+  .signal-cycle__index {
+    font-family: "Consolas", "SFMono-Regular", monospace;
+    font-size: 0.72rem;
+  }
+
+  .signal-cycle__label {
+    margin-top: 8px;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+
+  .signal-cycle__value {
+    margin-top: 10px;
+    color: var(--accent);
+    font-family: "Consolas", "SFMono-Regular", monospace;
+    font-size: 1.18rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .signal-cycle__note,
+  .signal-cycle__summary {
+    margin-top: 8px;
+    line-height: 1.45;
+  }
+
+  .live-signals-board__method-panel {
+    align-self: start;
+  }
+
   .bar {
     display: grid;
     gap: 8px;
@@ -579,6 +636,10 @@ const hostStyles = `
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .signal-cycle__rail {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .cols-3,
     .hero__grid {
       grid-template-columns: 1fr;
@@ -600,6 +661,7 @@ const hostStyles = `
     }
 
     .metrics,
+    .signal-cycle__rail,
     .cols-2 {
       grid-template-columns: 1fr;
     }
@@ -806,6 +868,11 @@ export function mountHybridDashboardHost(root) {
 
   ensureHostStyles();
   root.className = "hybrid-dashboard";
+  const liveSignalsDomain =
+    typeof window !== "undefined" &&
+    new URL(window.location.href).searchParams.get("domain") === "uap"
+      ? "uap"
+      : "signals";
 
   const state = {
     baseUrl: "/api",
@@ -816,12 +883,13 @@ export function mountHybridDashboardHost(root) {
     showSummits: true,
     history: [],
     liveSignals: {
+      domain: liveSignalsDomain,
       mode: "live_api",
       loading: false,
       error: null,
-      response: getDashboardFixture("mock"),
-      history: getHistoryFixture("mock"),
-      explain: getExplainFixture("mock"),
+      response: getDashboardFixture(liveSignalsDomain === "uap" ? "empty" : "mock"),
+      history: getHistoryFixture(liveSignalsDomain === "uap" ? "empty" : "mock"),
+      explain: getExplainFixture(liveSignalsDomain === "uap" ? "empty" : "mock"),
       transport: {
         source: "awaiting_snapshot",
         error: null,
@@ -845,12 +913,14 @@ export function mountHybridDashboardHost(root) {
           </div>
           <div class="hero__stats">
             <div class="hero__stat">
-              <div class="hero__stat-label">Primary feed</div>
-              <strong>MT07 shell + Live Signals overlay</strong>
+              <div class="hero__stat-label">MT-07 shell</div>
+              <strong>Simulation harness</strong>
+              <div class="hero__stat-meta">Synthetic axis trace only; not derived from live articles.</div>
             </div>
             <div class="hero__stat">
-              <div class="hero__stat-label">Signal window</div>
-              <strong>Rolling 6 hour situational view</strong>
+              <div class="hero__stat-label">Live Signals overlay</div>
+              <strong>Live/local API layer</strong>
+              <div class="hero__stat-meta">Metrics, event tape, held-out field, drawers, and Signal Cycle.</div>
             </div>
             <div class="hero__stat">
               <div class="hero__stat-label">Data plane</div>
@@ -865,7 +935,7 @@ export function mountHybridDashboardHost(root) {
         <div id="mt07ShellHost"></div>
         <div class="module-transition" aria-hidden="true">
           <div class="module-transition__line"></div>
-          <div class="module-transition__label">Live Signals overlay</div>
+          <div class="module-transition__label">Live Signals overlay - live/local API</div>
           <div class="module-transition__line"></div>
         </div>
         <div id="liveSignalsHost"></div>
@@ -899,7 +969,7 @@ export function mountHybridDashboardHost(root) {
 
     renderMT07InstrumentShell(mount, {
       title: "Weaver's Loom - MT07 v0.3.3",
-      subtitle: "Primary instrument shell with Live Signals modules mounted underneath.",
+      subtitle: "Simulation harness for MT-07 axis behavior; Live Signals data is mounted separately below.",
       baseUrl: state.baseUrl,
       demoMode: state.demoMode,
       rotating: state.rotating,
@@ -1019,6 +1089,7 @@ export function mountHybridDashboardHost(root) {
       const { dashboard, history, explain, transport } = await loadDashboardResponse({
         fixtureMode: state.liveSignals.mode,
         baseUrl: state.baseUrl,
+        domain: state.liveSignals.domain,
       });
       state.liveSignals.response = dashboard;
       state.liveSignals.history = history;

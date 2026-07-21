@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getSnapshotBundle, buildSnapshot } from "../services/snapshotService.js";
+import { getSnapshotBundleForRequest } from "../services/snapshotService.js";
 import { enrichDriverRowsWithTranslation } from "../services/translationService.js";
 import {
   buildEscalationPressureAudit,
@@ -10,7 +10,8 @@ const router = Router();
 
 router.get("/:key", async (req, res, next) => {
   try {
-    const bundle = getSnapshotBundle() || (await buildSnapshot(6));
+    const domain = req.query.domain === "uap" ? "uap" : "signals";
+    const { bundle, request } = await getSnapshotBundleForRequest(req.query, { domain });
     const key = req.params.key;
     const baseExplain = bundle.explain?.[key] || null;
 
@@ -19,8 +20,7 @@ router.get("/:key", async (req, res, next) => {
       return;
     }
 
-    const windowQuery = String(req.query.window || req.query.hours || req.query.window_hours || "6");
-    const windowHours = Number(windowQuery.replace(/h$/i, "")) || 6;
+    const windowHours = request.window_hours;
     let explain = baseExplain;
 
     if (key === "escalation_pressure") {
@@ -62,7 +62,10 @@ router.get("/:key", async (req, res, next) => {
       };
     }
 
-    res.json(explain);
+    res.json({
+      ...explain,
+      request
+    });
   } catch (error) {
     next(error);
   }
