@@ -114,7 +114,7 @@ const hostStyles = `
     display: grid;
     grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.8fr);
     gap: 18px;
-    align-items: end;
+    align-items: start;
   }
 
   .hero__eyebrow {
